@@ -2,7 +2,7 @@ library(RandomFields)
 library(SpatialExtremes)
 library(Rcpp)
 
-sourceCpp("/Users/ehector/Dropbox/Projects/SpatialExtremes-Brian/simulations/CL-funcs-20201123.cpp")
+sourceCpp("/Users/ehector/Dropbox/Projects/SpatialExtremes-Brian/simulations/CL-funcs-20201125.cpp")
 source("/Users/ehector/Dropbox/Projects/SpatialExtremes-Brian/simulations/R-wrappers-20201123.R")
 
 alpha <- 0.5
