@@ -44,6 +44,4 @@ BRdac <- function(y, covariates_1, covariates_2, covariates_3, locs){
                                             unlist(lapply(1:(K*(K-1)/2), 
                                                           function(x) sensitivity[,((x-1)*(2+p)+1):(x*(2+p))] %*% estimates[x,]))) 
   
-  output$coefficients <- rep(0, 2+p)
-  
 }
