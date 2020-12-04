@@ -686,15 +686,15 @@ List PCscore_all(const double& alpha, const double& phi, const arma::vec& beta_1
     score_i.rows(p_1+2, p_1+p_2+1) = 
       -( 1+ (y(i,0) - mu_1)*(1-xi_1)*pow(cent_1, -1)/sigma_1 ) * z_2_1.row(i).t()
       -( 1+ (y(i,1) - mu_2)*(1-xi_2)*pow(cent_2, -1)/sigma_2 ) * z_2_2.row(i).t()
-      -(y(i,0)-mu_1)/sigma_1 * pow(cent_1, 1/xi_1 - 1) * deriv_1 * z_1_1.row(i).t()
-      -(y(i,1)-mu_2)/sigma_2 * pow(cent_2, 1/xi_2 - 1) * deriv_2 * z_1_2.row(i).t()
+      -(y(i,0)-mu_1)/sigma_1 * pow(cent_1, 1/xi_1 - 1) * deriv_1 * z_2_1.row(i).t()
+      -(y(i,1)-mu_2)/sigma_2 * pow(cent_2, 1/xi_2 - 1) * deriv_2 * z_2_2.row(i).t()
       ;
     
     score_i.rows(p_1+p_2+2, p_1+p_2+p_3+1) = 
       1/xi_1*( (y(i,0) - mu_1)*(1-xi_1)/sigma_1 /( cent_1 ) - 1/xi_1 * log(cent_1 ) ) * z_3_1.row(i).t() +
       1/xi_2*( (y(i,1) - mu_2)*(1-xi_2)/sigma_2 /( cent_2 ) - 1/xi_2 * log(cent_2 ) ) * z_3_2.row(i).t()
-      +(-log(cent_1) / pow(xi_1, 2.0) + (y(i,0)-mu_1) / ( sigma_1*xi_1*cent_1 )) * pow(cent_1, 1/xi_1) * deriv_1 * z_1_1.row(i).t()
-      +(-log(cent_2) / pow(xi_2, 2.0) + (y(i,1)-mu_2) / ( sigma_2*xi_2*cent_2 )) * pow(cent_2, 1/xi_2) * deriv_2 * z_1_2.row(i).t()
+      +(-log(cent_1) / pow(xi_1, 2.0) + (y(i,0)-mu_1) / ( sigma_1*xi_1*cent_1 )) * pow(cent_1, 1/xi_1) * deriv_1 * z_3_1.row(i).t()
+      +(-log(cent_2) / pow(xi_2, 2.0) + (y(i,1)-mu_2) / ( sigma_2*xi_2*cent_2 )) * pow(cent_2, 1/xi_2) * deriv_2 * z_3_2.row(i).t()
       ;
     
     output(i) = score_i ;
@@ -857,15 +857,15 @@ arma::vec PCscore_all_sum(const double& alpha, const double& phi, const arma::ve
     score_i.rows(p_1+2, p_1+p_2+1) = 
       -( 1+ (y(i,0) - mu_1)*(1-xi_1)*pow(cent_1, -1)/sigma_1 ) * z_2_1.row(i).t()
       -( 1+ (y(i,1) - mu_2)*(1-xi_2)*pow(cent_2, -1)/sigma_2 ) * z_2_2.row(i).t()
-      -(y(i,0)-mu_1)/sigma_1 * pow(cent_1, 1/xi_1 - 1) * deriv_1 * z_1_1.row(i).t()
-      -(y(i,1)-mu_2)/sigma_2 * pow(cent_2, 1/xi_2 - 1) * deriv_2 * z_1_2.row(i).t()
+      -(y(i,0)-mu_1)/sigma_1 * pow(cent_1, 1/xi_1 - 1) * deriv_1 * z_2_1.row(i).t()
+      -(y(i,1)-mu_2)/sigma_2 * pow(cent_2, 1/xi_2 - 1) * deriv_2 * z_2_2.row(i).t()
       ;
         
     score_i.rows(p_1+p_2+2, p_1+p_2+p_3+1) = 
       1/xi_1*( (y(i,0) - mu_1)*(1-xi_1)/sigma_1 /( cent_1 ) - 1/xi_1 * log(cent_1 ) ) * z_3_1.row(i).t() 
       +1/xi_2*( (y(i,1) - mu_2)*(1-xi_2)/sigma_2 /( cent_2 ) - 1/xi_2 * log(cent_2 ) ) * z_3_2.row(i).t()
-      +(-log(cent_1) / pow(xi_1, 2.0) + (y(i,0)-mu_1) / ( sigma_1*xi_1*cent_1 )) * pow(cent_1, 1/xi_1) * deriv_1 * z_1_1.row(i).t()
-      +(-log(cent_2) / pow(xi_2, 2.0) + (y(i,1)-mu_2) / ( sigma_2*xi_2*cent_2 )) * pow(cent_2, 1/xi_2) * deriv_2 * z_1_2.row(i).t()
+      +(-log(cent_1) / pow(xi_1, 2.0) + (y(i,0)-mu_1) / ( sigma_1*xi_1*cent_1 )) * pow(cent_1, 1/xi_1) * deriv_1 * z_3_1.row(i).t()
+      +(-log(cent_2) / pow(xi_2, 2.0) + (y(i,1)-mu_2) / ( sigma_2*xi_2*cent_2 )) * pow(cent_2, 1/xi_2) * deriv_2 * z_3_2.row(i).t()
       ;
     
     score += score_i ;
@@ -879,11 +879,42 @@ double logCL_all(const double& alpha, const double& phi, const arma::vec& beta_1
                  const arma::mat& y, const arma::cube& z_1, const arma::cube& z_2, const arma::cube& z_3, const arma::mat& locs){
   int S = locs.n_rows;
   double SUM = 0;
+  
+  //There is an RcppArmadillo bug in subsetting a cube, we need to take the transpose to preserve dimensions
+  //when there is only one slice
+  //check here for updates: https://github.com/RcppCore/RcppArmadillo/issues/299
+  bool bug_1 = FALSE;
+  bool bug_2 = FALSE;
+  bool bug_3 = FALSE;
+  if(z_1.n_slices == 1) bug_1 = TRUE;
+  if(z_2.n_slices == 1) bug_2 = TRUE;
+  if(z_3.n_slices == 1) bug_3 = TRUE;
+  
+  arma::mat z_1_1, z_2_1, z_3_1, z_1_2, z_2_2, z_3_2;
   for(int s_1=0; s_1<S-1; s_1++){
     for(int s_2=s_1+1; s_2<S; s_2++){
+      z_1_1 = z_1.row(s_1);
+      z_2_1 = z_2.row(s_1);
+      z_3_1 = z_3.row(s_1);
+      z_1_2 = z_1.row(s_2);
+      z_2_2 = z_2.row(s_2);
+      z_3_2 = z_3.row(s_2);
+      
+      if(bug_1) {
+        z_1_1 = z_1_1.t();
+        z_1_2 = z_1_2.t();
+      }
+      if(bug_2) {
+        z_2_1 = z_2_1.t();
+        z_2_2 = z_2_2.t();
+      }
+      if(bug_3) {
+        z_3_1 = z_3_1.t();
+        z_3_2 = z_3_2.t();
+      }
+      
       SUM += logPCL_all(alpha, phi, beta_1, beta_2, beta_3, join_rows(y.col(s_1), y.col(s_2)), 
-                        z_1.row(s_1), z_2.row(s_1), z_3.row(s_1), 
-                        z_1.row(s_2), z_2.row(s_2), z_3.row(s_2), 
+                        z_1_1, z_2_1, z_3_1, z_1_2, z_2_2, z_3_2, 
                         locs.row(s_1).t(), locs.row(s_2).t());
     }
   }
@@ -909,6 +940,18 @@ List Cscore_all(const double& alpha, const double& phi, const arma::vec& beta_1,
          V_x1, V_x2, V_x1_x1,V_x2_x2, V_x1_x2, V_x1_x2_x2, V_x1_x1_x2, deriv_1, deriv_2, scale,
          mu_1, sigma_1, xi_1, mu_2, sigma_2, xi_2;
   arma::vec score_i, loc_1, loc_2;
+  
+  //There is an RcppArmadillo bug in subsetting a cube, we need to take the transpose to preserve dimensions
+  //when there is only one slice
+  
+  //check here for updates: https://github.com/RcppCore/RcppArmadillo/issues/299
+  bool bug_1 = FALSE;
+  bool bug_2 = FALSE;
+  bool bug_3 = FALSE;
+  if(z_1.n_slices == 1) bug_1 = TRUE;
+  if(z_2.n_slices == 1) bug_2 = TRUE;
+  if(z_3.n_slices == 1) bug_3 = TRUE;
+  
   arma::mat z_1_1, z_2_1, z_3_1, z_1_2, z_2_2, z_3_2;
   
   for(int i=0; i<n; i++){
@@ -937,6 +980,19 @@ List Cscore_all(const double& alpha, const double& phi, const arma::vec& beta_1,
         z_1_2 = z_1.row(s_2);
         z_2_2 = z_2.row(s_2);
         z_3_2 = z_3.row(s_2);
+        
+        if(bug_1) {
+          z_1_1 = z_1_1.t();
+          z_1_2 = z_1_2.t();
+        }
+        if(bug_2) {
+          z_2_1 = z_2_1.t();
+          z_2_2 = z_2_2.t();
+        }
+        if(bug_3) {
+          z_3_1 = z_3_1.t();
+          z_3_2 = z_3_2.t();
+        }
         
         mu_1 = as_scalar(z_1_1.row(i)*beta_1);
         sigma_1 = exp(as_scalar(z_2_1.row(i)*beta_2));
@@ -1050,15 +1106,15 @@ List Cscore_all(const double& alpha, const double& phi, const arma::vec& beta_1,
             score_i.rows(p_1+2, p_1+p_2+1) += 
               -( 1+ (y(i,s_1) - mu_1)*(1-xi_1)*pow(cent_1, -1)/sigma_1 ) * z_2_1.row(i).t()
               -( 1+ (y(i,s_2) - mu_2)*(1-xi_2)*pow(cent_2, -1)/sigma_2 ) * z_2_2.row(i).t()
-              -(y(i,s_1)-mu_1)/sigma_1 * pow(cent_1, 1/xi_1 - 1) * deriv_1 * z_1_1.row(i).t()
-              -(y(i,s_2)-mu_2)/sigma_2 * pow(cent_2, 1/xi_2 - 1) * deriv_2 * z_1_2.row(i).t()
+              -(y(i,s_1)-mu_1)/sigma_1 * pow(cent_1, 1/xi_1 - 1) * deriv_1 * z_2_1.row(i).t()
+              -(y(i,s_2)-mu_2)/sigma_2 * pow(cent_2, 1/xi_2 - 1) * deriv_2 * z_2_2.row(i).t()
               ;
             
             score_i.rows(p_1+p_2+2, p_1+p_2+p_3+1) += 
               1/xi_1*( (y(i,s_1) - mu_1)*(1-xi_1)/sigma_1 /( cent_1 ) - 1/xi_1 * log(cent_1 ) ) * z_3_1.row(i).t() 
               + 1/xi_2*( (y(i,s_2) - mu_2)*(1-xi_2)/sigma_2 /( cent_2 ) - 1/xi_2 * log(cent_2 ) ) * z_3_2.row(i).t()
-              +(-log(cent_1) / pow(xi_1, 2.0) + (y(i,s_1)-mu_1) / ( sigma_1*xi_1*cent_1 )) * pow(cent_1, 1/xi_1) * deriv_1 * z_1_1.row(i).t()
-              +(-log(cent_2) / pow(xi_2, 2.0) + (y(i,s_2)-mu_2) / ( sigma_2*xi_2*cent_2 )) * pow(cent_2, 1/xi_2) * deriv_2 * z_1_2.row(i).t()
+              +(-log(cent_1) / pow(xi_1, 2.0) + (y(i,s_1)-mu_1) / ( sigma_1*xi_1*cent_1 )) * pow(cent_1, 1/xi_1) * deriv_1 * z_3_1.row(i).t()
+              +(-log(cent_2) / pow(xi_2, 2.0) + (y(i,s_2)-mu_2) / ( sigma_2*xi_2*cent_2 )) * pow(cent_2, 1/xi_2) * deriv_2 * z_3_2.row(i).t()
               ;
       }
     }
@@ -1088,6 +1144,18 @@ arma::vec Cscore_all_sum(const double& alpha, const double& phi, const arma::vec
   V_x1, V_x2, V_x1_x1,V_x2_x2, V_x1_x2, V_x1_x2_x2, V_x1_x1_x2, deriv_1, deriv_2, scale,
   mu_1, sigma_1, xi_1, mu_2, sigma_2, xi_2;
   arma::vec score_i, loc_1, loc_2;
+  
+  //There is an RcppArmadillo bug in subsetting a cube, we need to take the transpose to preserve dimensions
+  //when there is only one slice
+  
+  //check here for updates: https://github.com/RcppCore/RcppArmadillo/issues/299
+  bool bug_1 = FALSE;
+  bool bug_2 = FALSE;
+  bool bug_3 = FALSE;
+  if(z_1.n_slices == 1) bug_1 = TRUE;
+  if(z_2.n_slices == 1) bug_2 = TRUE;
+  if(z_3.n_slices == 1) bug_3 = TRUE;
+  
   arma::mat z_1_1, z_2_1, z_3_1, z_1_2, z_2_2, z_3_2;
   
   for(int i=0; i<n; i++){
@@ -1116,6 +1184,19 @@ arma::vec Cscore_all_sum(const double& alpha, const double& phi, const arma::vec
         z_1_2 = z_1.row(s_2);
         z_2_2 = z_2.row(s_2);
         z_3_2 = z_3.row(s_2);
+        
+        if(bug_1) {
+          z_1_1 = z_1_1.t();
+          z_1_2 = z_1_2.t();
+        }
+        if(bug_2) {
+          z_2_1 = z_2_1.t();
+          z_2_2 = z_2_2.t();
+        }
+        if(bug_3) {
+          z_3_1 = z_3_1.t();
+          z_3_2 = z_3_2.t();
+        }
         
         mu_1 = as_scalar(z_1_1.row(i)*beta_1);
         sigma_1 = exp(as_scalar(z_2_1.row(i)*beta_2));
@@ -1229,15 +1310,15 @@ arma::vec Cscore_all_sum(const double& alpha, const double& phi, const arma::vec
      score_i.rows(p_1+2, p_1+p_2+1) += 
         -( 1+ (y(i,s_1) - mu_1)*(1-xi_1)*pow(cent_1, -1)/sigma_1 ) * z_2_1.row(i).t()
         -( 1+ (y(i,s_2) - mu_2)*(1-xi_2)*pow(cent_2, -1)/sigma_2 ) * z_2_2.row(i).t()
-        -(y(i,s_1)-mu_1)/sigma_1 * pow(cent_1, 1/xi_1 - 1) * deriv_1 * z_1_1.row(i).t()
-        -(y(i,s_2)-mu_2)/sigma_2 * pow(cent_2, 1/xi_2 - 1) * deriv_2 * z_1_2.row(i).t()
+        -(y(i,s_1)-mu_1)/sigma_1 * pow(cent_1, 1/xi_1 - 1) * deriv_1 * z_2_1.row(i).t()
+        -(y(i,s_2)-mu_2)/sigma_2 * pow(cent_2, 1/xi_2 - 1) * deriv_2 * z_2_2.row(i).t()
         ;
             
       score_i.rows(p_1+p_2+2, p_1+p_2+p_3+1) += 
         1/xi_1*( (y(i,s_1) - mu_1)*(1-xi_1)/sigma_1 /( cent_1 ) - 1/xi_1 * log(cent_1 ) ) * z_3_1.row(i).t() 
         + 1/xi_2*( (y(i,s_2) - mu_2)*(1-xi_2)/sigma_2 /( cent_2 ) - 1/xi_2 * log(cent_2 ) ) * z_3_2.row(i).t()
-        +(-log(cent_1) / pow(xi_1, 2.0) + (y(i,s_1)-mu_1) / ( sigma_1*xi_1*cent_1 )) * pow(cent_1, 1/xi_1) * deriv_1 * z_1_1.row(i).t()
-        +(-log(cent_2) / pow(xi_2, 2.0) + (y(i,s_2)-mu_2) / ( sigma_2*xi_2*cent_2 )) * pow(cent_2, 1/xi_2) * deriv_2 * z_1_2.row(i).t()
+        +(-log(cent_1) / pow(xi_1, 2.0) + (y(i,s_1)-mu_1) / ( sigma_1*xi_1*cent_1 )) * pow(cent_1, 1/xi_1) * deriv_1 * z_3_1.row(i).t()
+        +(-log(cent_2) / pow(xi_2, 2.0) + (y(i,s_2)-mu_2) / ( sigma_2*xi_2*cent_2 )) * pow(cent_2, 1/xi_2) * deriv_2 * z_3_2.row(i).t()
         ;
       }
     }
