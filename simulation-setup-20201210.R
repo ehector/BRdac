@@ -1,4 +1,3 @@
-#work_dir <- "/Users/ehector/Dropbox/Projects/SpatialExtremes-Brian/simulations/"
 work_dir <- "/home/ehector/share/research1/BRdac"
 sim <- as.numeric(Sys.getenv('LSB_JOBINDEX'))
 
