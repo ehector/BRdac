@@ -1,0 +1,16 @@
+Package: BRdac
+Type: Package
+Title: Brown-Resnick divide-and-conquer
+Version: 1.0-1
+Date: 2020-12-08
+Author: Emily C. Hector
+Maintainer: [Emily C. Hector] <ehector@ncsu.edu>
+Description: Performs regression analysis of Brown-Resnick spatial data using a divide-and-conquer approach.
+License: GPL-3
+Imports: Rcpp (>= 0.12.11),
+         Matrix (>= 1.2.11),
+         stats,
+         MASS (>= 7.3.47),
+         RcppParallel (>= 4.3.10)
+LinkingTo: Rcpp, RcppArmadillo, RcppParallel
+SystemRequirements: GNU make
