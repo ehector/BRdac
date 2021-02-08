@@ -5,60 +5,20 @@ z_constructor <- function(covariates, S, N, p) {
     .Call(`_BRdac_z_constructor`, covariates, S, N, p)
 }
 
-logPCL_BR <- function(alpha, phi, x, loc_1, loc_2) {
-    .Call(`_BRdac_logPCL_BR`, alpha, phi, x, loc_1, loc_2)
-}
-
-PCscore_BR <- function(alpha, phi, x, loc_1, loc_2) {
-    .Call(`_BRdac_PCscore_BR`, alpha, phi, x, loc_1, loc_2)
-}
-
-PCscore_BR_sum <- function(alpha, phi, x, loc_1, loc_2) {
-    .Call(`_BRdac_PCscore_BR_sum`, alpha, phi, x, loc_1, loc_2)
-}
-
-logCL_BR <- function(par, x, locs) {
-    .Call(`_BRdac_logCL_BR`, par, x, locs)
-}
-
-Cscore_BR <- function(par, x, locs) {
-    .Call(`_BRdac_Cscore_BR`, par, x, locs)
-}
-
-Cscore_BR_sum <- function(alpha, phi, x, locs) {
-    .Call(`_BRdac_Cscore_BR_sum`, alpha, phi, x, locs)
-}
-
 logPCL_all <- function(alpha, phi, beta_1, beta_2, beta_3, y, z_1_1, z_2_1, z_3_1, z_1_2, z_2_2, z_3_2, loc_1, loc_2) {
     .Call(`_BRdac_logPCL_all`, alpha, phi, beta_1, beta_2, beta_3, y, z_1_1, z_2_1, z_3_1, z_1_2, z_2_2, z_3_2, loc_1, loc_2)
-}
-
-PCscore_all <- function(alpha, phi, beta_1, beta_2, beta_3, y, z_1_1, z_2_1, z_3_1, z_1_2, z_2_2, z_3_2, loc_1, loc_2) {
-    .Call(`_BRdac_PCscore_all`, alpha, phi, beta_1, beta_2, beta_3, y, z_1_1, z_2_1, z_3_1, z_1_2, z_2_2, z_3_2, loc_1, loc_2)
-}
-
-PCscore_all_sum <- function(alpha, phi, beta_1, beta_2, beta_3, y, z_1_1, z_2_1, z_3_1, z_1_2, z_2_2, z_3_2, loc_1, loc_2) {
-    .Call(`_BRdac_PCscore_all_sum`, alpha, phi, beta_1, beta_2, beta_3, y, z_1_1, z_2_1, z_3_1, z_1_2, z_2_2, z_3_2, loc_1, loc_2)
 }
 
 logCL_all <- function(par, y, z_1, z_2, z_3, locs) {
     .Call(`_BRdac_logCL_all`, par, y, z_1, z_2, z_3, locs)
 }
 
-Cscore_all <- function(par, y, z_1, z_2, z_3, locs) {
-    .Call(`_BRdac_Cscore_all`, par, y, z_1, z_2, z_3, locs)
-}
-
-Cscore_all_sum <- function(par, y, z_1, z_2, z_3, locs) {
-    .Call(`_BRdac_Cscore_all_sum`, par, y, z_1, z_2, z_3, locs)
-}
-
-Chessian_all_sum <- function(par, y, z_1, z_2, z_3, locs) {
-    .Call(`_BRdac_Chessian_all_sum`, par, y, z_1, z_2, z_3, locs)
-}
-
 Chessian_all_raw <- function(par, y, z_1, z_2, z_3, locs) {
     .Call(`_BRdac_Chessian_all_raw`, par, y, z_1, z_2, z_3, locs)
+}
+
+Cscore_all <- function(par, y, z_1, z_2, z_3, locs) {
+    .Call(`_BRdac_Cscore_all`, par, y, z_1, z_2, z_3, locs)
 }
 
 quadratic_form_par <- function(par, y, z_1, z_2, z_3, locs, K) {
