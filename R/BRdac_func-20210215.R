@@ -218,6 +218,7 @@ BRdacVCMmu <- function(y, covariates_2, covariates_3, locs, indicator){
   X_tilde <- X_tilde[order(pos_cols[,2], pos_cols[,1]),]
   output$mu.fitted.values <- as.vector(X_tilde%*%output$coefficients[-c(1:2,(2+K*p_1+1):(2+K*p_1+p_2+p_3))])
   se <- sqrt(diag(X_tilde %*% output$vcov[-c(1:2,(2+K*p_1+1):(2+K*p_1+p_2+p_3)),-c(1:2,(2+K*p_1+1):(2+K*p_1+p_2+p_3))] %*%t(X_tilde)))
+  output$mu.se <- se
   output$PCP <- mean(beta_1 <= output$mu.fitted.values + 1.96*se & beta_1 >= output$mu.fitted.values-1.96*se)
   
   return(output)
