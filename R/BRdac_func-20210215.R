@@ -100,14 +100,12 @@ BRdac <- function(y, covariates_1, covariates_2, covariates_3, locs, indicator){
   return(output)
 }
 
-BRdacVCMmu <- function(y, covariates_1, covariates_2, covariates_3, locs, indicator){
+BRdacVCMmu <- function(y, covariates_2, covariates_3, locs, indicator){
   time <- proc.time()
   output <- list()
   
-  #p_1 <- dim(covariates_1)[2]
   p_2 <- dim(covariates_2)[2]
   p_3 <- dim(covariates_3)[2]
-  #p <- p_1+p_2+p_3
   
   S <- nrow(locs)
   N <- nrow(y)
@@ -147,7 +145,7 @@ BRdacVCMmu <- function(y, covariates_1, covariates_2, covariates_3, locs, indica
       sigma[i] <- marg.param["scale"]
       xi[i] <- marg.param["shape"]
     }
-    #x_1 <- covariates_1[c(t(sapply(which(indicator==k), function(x) x+seq(0,(N-1)*S,S)))),]
+
     x_2 <- covariates_2[c(t(sapply(which(indicator==k), function(x) x+seq(0,(N-1)*S,S)))),]
     x_3 <- covariates_3[c(t(sapply(which(indicator==k), function(x) x+seq(0,(N-1)*S,S)))),]
     
