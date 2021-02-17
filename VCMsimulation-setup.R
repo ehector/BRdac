@@ -1,4 +1,3 @@
-#work_dir <- "/Users/ehector/Dropbox/Projects/SpatialExtremes-Brian/simulations/"
 work_dir <- "/share/research1/ehector/"
 sim <- as.numeric(Sys.getenv('LSB_JOBINDEX'))
 
@@ -33,9 +32,7 @@ p <- p_1 + p_2 + p_3
 
 X <- rmaxstab(n=N, coord=s, cov.mod="brown", grid=FALSE, range=phi, smooth=alpha)
 
-covariates_1 <- do.call(rbind, lapply(1:N, function(x) diag(S)))
 covariates_2 <- covariates_3 <- as.matrix(rep(1,N*S))
-z_1 <- z_constructor(covariates_1, S, N, p_1)
 z_2 <- z_constructor(covariates_2, S, N, p_2)
 z_3 <- z_constructor(covariates_3, S, N, p_3)
 mu <- t(matrix(rep(beta_1,N), S, N))
@@ -44,13 +41,7 @@ xi <- apply(z_3, 1, function(x) x%*%beta_3)
 Y <- mu + sigma/xi*(X^xi - 1)
 
 output <- list()
-output[[sim]]  <- BRdac(y=Y, covariates_1, covariates_2, covariates_3, locs=s, indicator)
-
-#package_output <- list()
-#package_time <- system.time(package_output[[sim]] <- fitmaxstab(Y, s, cov.mod="brown", loc ~ 0 + s, scale ~ 1, shape ~ 1)) ## doesn't allow subject-level covariates, only spatial covariates
-
-#CL_output <- list()
-#CL_time <- system.time(CL_output[[sim]] <- CL(y=Y, covariates_1, covariates_2, covariates_3, locs=s))
+output[[sim]]  <- BRdacVCMmu(y=Y, covariates_2, covariates_3, locs=s, indicator)
 
 save.image(paste0(work_dir, "BRdacVCM_N", N, "S", S, "p", p, "sk", paste(unique(table(indicator)), collapse=""), "sim",sim, ".RData"))
 
