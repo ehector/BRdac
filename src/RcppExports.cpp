@@ -6,6 +6,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // z_constructor
 arma::cube z_constructor(const arma::mat& covariates, const int& S, const int& N, const int& p);
 RcppExport SEXP _BRdac_z_constructor(SEXP covariatesSEXP, SEXP SSEXP, SEXP NSEXP, SEXP pSEXP) {
@@ -20,9 +25,52 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// logPCL_all
-double logPCL_all(const double& alpha, const double& phi, const arma::vec& beta_1, const arma::vec& beta_2, const arma::vec& beta_3, const arma::mat& y, const arma::mat& z_1_1, const arma::mat& z_2_1, const arma::mat& z_3_1, const arma::mat& z_1_2, const arma::mat& z_2_2, const arma::mat& z_3_2, const arma::vec& loc_1, const arma::vec& loc_2);
-RcppExport SEXP _BRdac_logPCL_all(SEXP alphaSEXP, SEXP phiSEXP, SEXP beta_1SEXP, SEXP beta_2SEXP, SEXP beta_3SEXP, SEXP ySEXP, SEXP z_1_1SEXP, SEXP z_2_1SEXP, SEXP z_3_1SEXP, SEXP z_1_2SEXP, SEXP z_2_2SEXP, SEXP z_3_2SEXP, SEXP loc_1SEXP, SEXP loc_2SEXP) {
+// logPCL_BR_thresh
+double logPCL_BR_thresh(const double& alpha, const double& phi, const double& u, const arma::mat& x, const arma::vec& loc_1, const arma::vec& loc_2);
+RcppExport SEXP _BRdac_logPCL_BR_thresh(SEXP alphaSEXP, SEXP phiSEXP, SEXP uSEXP, SEXP xSEXP, SEXP loc_1SEXP, SEXP loc_2SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const double& >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< const double& >::type phi(phiSEXP);
+    Rcpp::traits::input_parameter< const double& >::type u(uSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type loc_1(loc_1SEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type loc_2(loc_2SEXP);
+    rcpp_result_gen = Rcpp::wrap(logPCL_BR_thresh(alpha, phi, u, x, loc_1, loc_2));
+    return rcpp_result_gen;
+END_RCPP
+}
+// logCL_BR_thresh
+double logCL_BR_thresh(const arma::vec& par, const double& u, const arma::mat& x, const arma::mat& locs);
+RcppExport SEXP _BRdac_logCL_BR_thresh(SEXP parSEXP, SEXP uSEXP, SEXP xSEXP, SEXP locsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type par(parSEXP);
+    Rcpp::traits::input_parameter< const double& >::type u(uSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type locs(locsSEXP);
+    rcpp_result_gen = Rcpp::wrap(logCL_BR_thresh(par, u, x, locs));
+    return rcpp_result_gen;
+END_RCPP
+}
+// Cscore_BR
+arma::mat Cscore_BR(const arma::vec& par, const arma::mat& x, const arma::mat& locs);
+RcppExport SEXP _BRdac_Cscore_BR(SEXP parSEXP, SEXP xSEXP, SEXP locsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type par(parSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type locs(locsSEXP);
+    rcpp_result_gen = Rcpp::wrap(Cscore_BR(par, x, locs));
+    return rcpp_result_gen;
+END_RCPP
+}
+// logPCL_all_thresh
+double logPCL_all_thresh(const double& alpha, const double& phi, const arma::vec& beta_1, const arma::vec& beta_2, const arma::vec& beta_3, const double& u, const arma::mat& y, const arma::mat& z_1_1, const arma::mat& z_2_1, const arma::mat& z_3_1, const arma::mat& z_1_2, const arma::mat& z_2_2, const arma::mat& z_3_2, const arma::vec& loc_1, const arma::vec& loc_2);
+RcppExport SEXP _BRdac_logPCL_all_thresh(SEXP alphaSEXP, SEXP phiSEXP, SEXP beta_1SEXP, SEXP beta_2SEXP, SEXP beta_3SEXP, SEXP uSEXP, SEXP ySEXP, SEXP z_1_1SEXP, SEXP z_2_1SEXP, SEXP z_3_1SEXP, SEXP z_1_2SEXP, SEXP z_2_2SEXP, SEXP z_3_2SEXP, SEXP loc_1SEXP, SEXP loc_2SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -31,6 +79,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::vec& >::type beta_1(beta_1SEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type beta_2(beta_2SEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type beta_3(beta_3SEXP);
+    Rcpp::traits::input_parameter< const double& >::type u(uSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type y(ySEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type z_1_1(z_1_1SEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type z_2_1(z_2_1SEXP);
@@ -40,83 +89,53 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::mat& >::type z_3_2(z_3_2SEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type loc_1(loc_1SEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type loc_2(loc_2SEXP);
-    rcpp_result_gen = Rcpp::wrap(logPCL_all(alpha, phi, beta_1, beta_2, beta_3, y, z_1_1, z_2_1, z_3_1, z_1_2, z_2_2, z_3_2, loc_1, loc_2));
+    rcpp_result_gen = Rcpp::wrap(logPCL_all_thresh(alpha, phi, beta_1, beta_2, beta_3, u, y, z_1_1, z_2_1, z_3_1, z_1_2, z_2_2, z_3_2, loc_1, loc_2));
     return rcpp_result_gen;
 END_RCPP
 }
-// logCL_all
-double logCL_all(const arma::vec& par, const arma::mat& y, const arma::cube& z_1, const arma::cube& z_2, const arma::cube& z_3, const arma::mat& locs);
-RcppExport SEXP _BRdac_logCL_all(SEXP parSEXP, SEXP ySEXP, SEXP z_1SEXP, SEXP z_2SEXP, SEXP z_3SEXP, SEXP locsSEXP) {
+// logCL_all_thresh
+double logCL_all_thresh(const arma::vec& par, const double& u, const arma::mat& y, const arma::cube& z_1, const arma::cube& z_2, const arma::cube& z_3, const arma::mat& locs);
+RcppExport SEXP _BRdac_logCL_all_thresh(SEXP parSEXP, SEXP uSEXP, SEXP ySEXP, SEXP z_1SEXP, SEXP z_2SEXP, SEXP z_3SEXP, SEXP locsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::vec& >::type par(parSEXP);
+    Rcpp::traits::input_parameter< const double& >::type u(uSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type y(ySEXP);
     Rcpp::traits::input_parameter< const arma::cube& >::type z_1(z_1SEXP);
     Rcpp::traits::input_parameter< const arma::cube& >::type z_2(z_2SEXP);
     Rcpp::traits::input_parameter< const arma::cube& >::type z_3(z_3SEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type locs(locsSEXP);
-    rcpp_result_gen = Rcpp::wrap(logCL_all(par, y, z_1, z_2, z_3, locs));
+    rcpp_result_gen = Rcpp::wrap(logCL_all_thresh(par, u, y, z_1, z_2, z_3, locs));
     return rcpp_result_gen;
 END_RCPP
 }
-// Chessian_all_raw
-List Chessian_all_raw(const arma::vec& par, const arma::mat& y, const arma::cube& z_1, const arma::cube& z_2, const arma::cube& z_3, const arma::mat& locs);
-RcppExport SEXP _BRdac_Chessian_all_raw(SEXP parSEXP, SEXP ySEXP, SEXP z_1SEXP, SEXP z_2SEXP, SEXP z_3SEXP, SEXP locsSEXP) {
+// Chessian_all_thresh
+List Chessian_all_thresh(const arma::vec& par, const double& u, const arma::mat& y, const arma::cube& z_1, const arma::cube& z_2, const arma::cube& z_3, const arma::mat& locs);
+RcppExport SEXP _BRdac_Chessian_all_thresh(SEXP parSEXP, SEXP uSEXP, SEXP ySEXP, SEXP z_1SEXP, SEXP z_2SEXP, SEXP z_3SEXP, SEXP locsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::vec& >::type par(parSEXP);
+    Rcpp::traits::input_parameter< const double& >::type u(uSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type y(ySEXP);
     Rcpp::traits::input_parameter< const arma::cube& >::type z_1(z_1SEXP);
     Rcpp::traits::input_parameter< const arma::cube& >::type z_2(z_2SEXP);
     Rcpp::traits::input_parameter< const arma::cube& >::type z_3(z_3SEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type locs(locsSEXP);
-    rcpp_result_gen = Rcpp::wrap(Chessian_all_raw(par, y, z_1, z_2, z_3, locs));
-    return rcpp_result_gen;
-END_RCPP
-}
-// Cscore_all
-arma::mat Cscore_all(const arma::vec& par, const arma::mat& y, const arma::cube& z_1, const arma::cube& z_2, const arma::cube& z_3, const arma::mat& locs);
-RcppExport SEXP _BRdac_Cscore_all(SEXP parSEXP, SEXP ySEXP, SEXP z_1SEXP, SEXP z_2SEXP, SEXP z_3SEXP, SEXP locsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::vec& >::type par(parSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type y(ySEXP);
-    Rcpp::traits::input_parameter< const arma::cube& >::type z_1(z_1SEXP);
-    Rcpp::traits::input_parameter< const arma::cube& >::type z_2(z_2SEXP);
-    Rcpp::traits::input_parameter< const arma::cube& >::type z_3(z_3SEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type locs(locsSEXP);
-    rcpp_result_gen = Rcpp::wrap(Cscore_all(par, y, z_1, z_2, z_3, locs));
-    return rcpp_result_gen;
-END_RCPP
-}
-// quadratic_form_par
-double quadratic_form_par(const arma::vec& par, const arma::mat& y, const arma::cube& z_1, const arma::cube& z_2, const arma::cube& z_3, const arma::mat& locs, const int& K);
-RcppExport SEXP _BRdac_quadratic_form_par(SEXP parSEXP, SEXP ySEXP, SEXP z_1SEXP, SEXP z_2SEXP, SEXP z_3SEXP, SEXP locsSEXP, SEXP KSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::vec& >::type par(parSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type y(ySEXP);
-    Rcpp::traits::input_parameter< const arma::cube& >::type z_1(z_1SEXP);
-    Rcpp::traits::input_parameter< const arma::cube& >::type z_2(z_2SEXP);
-    Rcpp::traits::input_parameter< const arma::cube& >::type z_3(z_3SEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type locs(locsSEXP);
-    Rcpp::traits::input_parameter< const int& >::type K(KSEXP);
-    rcpp_result_gen = Rcpp::wrap(quadratic_form_par(par, y, z_1, z_2, z_3, locs, K));
+    rcpp_result_gen = Rcpp::wrap(Chessian_all_thresh(par, u, y, z_1, z_2, z_3, locs));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
     {"_BRdac_z_constructor", (DL_FUNC) &_BRdac_z_constructor, 4},
-    {"_BRdac_logPCL_all", (DL_FUNC) &_BRdac_logPCL_all, 14},
-    {"_BRdac_logCL_all", (DL_FUNC) &_BRdac_logCL_all, 6},
-    {"_BRdac_Chessian_all_raw", (DL_FUNC) &_BRdac_Chessian_all_raw, 6},
-    {"_BRdac_Cscore_all", (DL_FUNC) &_BRdac_Cscore_all, 6},
-    {"_BRdac_quadratic_form_par", (DL_FUNC) &_BRdac_quadratic_form_par, 7},
+    {"_BRdac_logPCL_BR_thresh", (DL_FUNC) &_BRdac_logPCL_BR_thresh, 6},
+    {"_BRdac_logCL_BR_thresh", (DL_FUNC) &_BRdac_logCL_BR_thresh, 4},
+    {"_BRdac_Cscore_BR", (DL_FUNC) &_BRdac_Cscore_BR, 3},
+    {"_BRdac_logPCL_all_thresh", (DL_FUNC) &_BRdac_logPCL_all_thresh, 15},
+    {"_BRdac_logCL_all_thresh", (DL_FUNC) &_BRdac_logCL_all_thresh, 7},
+    {"_BRdac_Chessian_all_thresh", (DL_FUNC) &_BRdac_Chessian_all_thresh, 7},
     {NULL, NULL, 0}
 };
 
