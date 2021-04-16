@@ -52,7 +52,7 @@ BRdac <- function(y, covariates_1, covariates_2, covariates_3, u, locs, indicato
     
     opt_2 <-
       nlminb(start=init_values, objective=logCL_all_thresh, u=u,
-             y=y[,indicator==k], z_1=z_1[indicator==k,,,drop=FALSE], z_2=z_2[indicator==k,,,drop=FALSE], 
+             y=y[,indicator==k,drop=FALSE], z_1=z_1[indicator==k,,,drop=FALSE], z_2=z_2[indicator==k,,,drop=FALSE], 
              z_3=z_3[indicator==k,,,drop=FALSE], locs=locs[indicator==k,],
              lower=c(1e-5,1e-5,rep(-Inf,p)), upper=c(2-1e-5,rep(Inf,1+p)))
     
@@ -82,10 +82,6 @@ BRdac <- function(y, covariates_1, covariates_2, covariates_3, u, locs, indicato
   V <- (psi-rowMeans(psi))%*%t(psi-rowMeans(psi))
   V_inv <- solve(V)
   matrix <- as.matrix(Matrix::bdiag(lapply(1:K, function(k) V_inv[((k-1)*(p+2)+1):(k*(p+2)), ((k-1)*(p+2)+1):(k*(p+2))])))
-  #matrix[seq(1,K*(p+2),p+2), ] <- V_inv[seq(1,K*(p+2),p+2), ]
-  #matrix[ ,seq(1,K*(p+2),p+2)] <- V_inv[ ,seq(1,K*(p+2),p+2)]
-  #matrix[seq(2,K*(p+2),p+2), ] <- V_inv[seq(2,K*(p+2),p+2), ]
-  #matrix[ ,seq(2,K*(p+2),p+2)] <- V_inv[ ,seq(2,K*(p+2),p+2)]
   V_inv <- matrix
   weight <- solve(sensitivity %*% V_inv %*% t(sensitivity))
   output$coefficients <- as.vector(weight %*% 
