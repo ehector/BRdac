@@ -5,27 +5,27 @@ z_constructor <- function(covariates, S, N, p) {
     .Call(`_BRdac_z_constructor`, covariates, S, N, p)
 }
 
-logPCL_BR_thresh <- function(alpha, phi, u, x, loc_1, loc_2) {
-    .Call(`_BRdac_logPCL_BR_thresh`, alpha, phi, u, x, loc_1, loc_2)
+logPCL_BR_thresh <- function(alpha, phi, u_1, u_2, x, loc_1, loc_2) {
+    .Call(`_BRdac_logPCL_BR_thresh`, alpha, phi, u_1, u_2, x, loc_1, loc_2)
 }
 
-logCL_BR_thresh <- function(par, u, x, locs) {
-    .Call(`_BRdac_logCL_BR_thresh`, par, u, x, locs)
+logCL_BR_thresh <- function(par, thresholds, x, locs) {
+    .Call(`_BRdac_logCL_BR_thresh`, par, thresholds, x, locs)
 }
 
-Cscore_BR <- function(par, x, locs) {
-    .Call(`_BRdac_Cscore_BR`, par, x, locs)
+Cscore_BR_thresh <- function(par, u, x, locs) {
+    .Call(`_BRdac_Cscore_BR_thresh`, par, u, x, locs)
 }
 
-logPCL_all_thresh <- function(alpha, phi, beta_1, beta_2, beta_3, u, y, z_1_1, z_2_1, z_3_1, z_1_2, z_2_2, z_3_2, loc_1, loc_2) {
-    .Call(`_BRdac_logPCL_all_thresh`, alpha, phi, beta_1, beta_2, beta_3, u, y, z_1_1, z_2_1, z_3_1, z_1_2, z_2_2, z_3_2, loc_1, loc_2)
+logPCL_all_thresh <- function(alpha, phi, beta_1, beta_2, beta_3, u_1, u_2, y, z_1_1, z_2_1, z_3_1, z_1_2, z_2_2, z_3_2, loc_1, loc_2) {
+    .Call(`_BRdac_logPCL_all_thresh`, alpha, phi, beta_1, beta_2, beta_3, u_1, u_2, y, z_1_1, z_2_1, z_3_1, z_1_2, z_2_2, z_3_2, loc_1, loc_2)
 }
 
-logCL_all_thresh <- function(par, u, y, z_1, z_2, z_3, locs) {
-    .Call(`_BRdac_logCL_all_thresh`, par, u, y, z_1, z_2, z_3, locs)
+logCL_all_thresh <- function(par, thresholds, y, z_1, z_2, z_3, locs) {
+    .Call(`_BRdac_logCL_all_thresh`, par, thresholds, y, z_1, z_2, z_3, locs)
 }
 
-Chessian_all_thresh <- function(par, u, y, z_1, z_2, z_3, locs) {
-    .Call(`_BRdac_Chessian_all_thresh`, par, u, y, z_1, z_2, z_3, locs)
+Chessian_all_thresh <- function(par, thresholds, y, z_1, z_2, z_3, locs) {
+    .Call(`_BRdac_Chessian_all_thresh`, par, thresholds, y, z_1, z_2, z_3, locs)
 }
 
