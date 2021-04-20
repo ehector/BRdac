@@ -7,19 +7,21 @@ library(BRdac)
 set.seed(sim)
 
 alpha <- 1
-phi <- 3
+phi <- 10
 N <- 1000
 dim <- 20
 
 s <- as.matrix(expand.grid(1:dim,1:dim))
 S <- nrow(s)
-square_block_dim <- 5
+height_block_dim <- 5
+width_block_dim <- 5
 indicator <- rep(0,S)
-num <- sqrt(S/square_block_dim^2)
-for(k in 1:num){
-  for(j in 1:num){
-    indicator[s[,1] > (k-1)*square_block_dim & s[,1]<=k*square_block_dim & 
-                s[,2] > (j-1)*square_block_dim & s[,2]<=j*square_block_dim] <- (k-1)*num+j
+height_num <- dim/height_block_dim
+width_num <- dim/width_block_dim
+for(k in 1:height_num){
+  for(j in 1:width_num){
+    indicator[s[,1] > (k-1)*height_block_dim & s[,1]<=k*height_block_dim & 
+                s[,2] > (j-1)*width_block_dim & s[,2]<=j*width_block_dim] <- (k-1)*width_num+j
   }
 }
 
@@ -44,13 +46,10 @@ xi <- apply(z_3, 1, function(x) x%*%beta_3)
 Y <- mu + sigma/xi*(X^xi - 1)
 
 output <- list()
-output[[sim]]  <- BRdac(y=Y, covariates_1, covariates_2, covariates_3, locs=s, indicator)
-
-package_output <- list()
-package_time <- system.time(package_output[[sim]] <- fitmaxstab(Y, s, cov.mod="brown", loc ~ 0 + s, scale ~ 1, shape ~ 1)) ## doesn't allow subject-level covariates, only spatial covariates
+output[[sim]]  <- BRdac(y=Y, covariates_1, covariates_2, covariates_3, quantile=0.8, locs=s, indicator)
 
 CL_output <- list()
-CL_time <- system.time(CL_output[[sim]] <- CL(y=Y, covariates_1, covariates_2, covariates_3, locs=s))
+CL_time <- system.time(CL_output[[sim]] <- CL(y=Y, covariates_1, covariates_2, covariates_3, quantile=0.8, locs=s))
 
 save.image(paste0(work_dir, "BRdac_N", N, "S", S, "p", p, "sk", paste(unique(table(indicator)), collapse=""), "sim",sim, ".RData"))
 
