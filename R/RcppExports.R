@@ -13,8 +13,8 @@ logCL_BR_thresh <- function(par, thresholds, x, locs) {
     .Call(`_BRdac_logCL_BR_thresh`, par, thresholds, x, locs)
 }
 
-Cscore_BR_thresh <- function(par, u, x, locs) {
-    .Call(`_BRdac_Cscore_BR_thresh`, par, u, x, locs)
+Cscore_BR_thresh <- function(par, thresholds, x, locs) {
+    .Call(`_BRdac_Cscore_BR_thresh`, par, thresholds, x, locs)
 }
 
 logPCL_all_thresh <- function(alpha, phi, beta_1, beta_2, beta_3, u_1, u_2, y, z_1_1, z_2_1, z_3_1, z_1_2, z_2_2, z_3_2, loc_1, loc_2) {
@@ -27,5 +27,9 @@ logCL_all_thresh <- function(par, thresholds, y, z_1, z_2, z_3, locs) {
 
 Chessian_all_thresh <- function(par, thresholds, y, z_1, z_2, z_3, locs) {
     .Call(`_BRdac_Chessian_all_thresh`, par, thresholds, y, z_1, z_2, z_3, locs)
+}
+
+score_all_thresh <- function(par, thresholds, y, z_1, z_2, z_3, locs) {
+    .Call(`_BRdac_score_all_thresh`, par, thresholds, y, z_1, z_2, z_3, locs)
 }
 
