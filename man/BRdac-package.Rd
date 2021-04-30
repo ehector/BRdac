@@ -29,7 +29,7 @@
 \examples{
 
 \dontrun{
-alpha <- 0.8
+alpha <- 1
 phi <- 10
 N <- 1000
 dim <- 20
