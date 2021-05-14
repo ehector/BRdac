@@ -13,7 +13,7 @@ Please email ehector@ncsu.edu with any questions or bug-reports.
 
 The BRdac R package can be installed in one of two ways:
 - from the downloaded gzipped tarball as R CMD INSTALL BRdac_1.0-1.tar.gz
-- from the downloaded and renamed DIMM folder as R CMD build BRdac and R CMD INSTALL BRdac_1.0-1.tar.gz
+- from the downloaded and renamed BRdac folder as R CMD build BRdac and R CMD INSTALL BRdac_1.0-1.tar.gz
 
 Please make sure to have all packages listed in the DESCRIPTION file already installed.
 
