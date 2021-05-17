@@ -19,16 +19,16 @@ BRdac <- function(y, covariates_1, covariates_2, covariates_3, quantile=0.95, lo
   psi_list <- sensitivity_list <- list()
   
   if(quantile>=0) {
-    thresholds <- apply(Y, 2, function(x) quantile(x, prob=quantile))
+    thresholds <- apply(y, 2, function(x) quantile(x, prob=quantile))
   } else {
-    thresholds <- rep(min(Y)-1, S)
+    thresholds <- rep(min(y)-1, S)
   }
   
   n.pairs <- S * (S-1)/2
   extcoeff <- SpatialExtremes::fitextcoeff(y, locs, estim="ST", plot=FALSE, loess=FALSE, marge="emp", std.err=FALSE, prob=quantile)
   weights <- rep(1, n.pairs)
   extcoeff <- extcoeff[, "ext.coeff"]
-  dist <- distance(locs)
+  dist <- SpatialExtremes::distance(locs)
   funBR <- function(range, smooth) .C(SpatialExtremes:::C_fitbrcovariance, as.double(range), as.double(smooth), as.integer(n.pairs), 
                                       as.double(dist), as.double(extcoeff), as.double(weights), ans = double(1))$ans
   start <- list(range = max(dist)/2.73, smooth = 0.75)
@@ -39,7 +39,7 @@ BRdac <- function(y, covariates_1, covariates_2, covariates_3, quantile=0.95, lo
   
   mu <- sigma <- xi <- rep(0, S)
   for (i in 1:S) {
-    marg.param <- gevmle(y[,i])
+    marg.param <- SpatialExtremes::gevmle(y[,i])
     mu[i] <- marg.param["loc"]
     sigma[i] <- marg.param["scale"]
     xi[i] <- marg.param["shape"]
@@ -133,7 +133,7 @@ BRdacVCMmu <- function(y, covariates_2, covariates_3, locs, indicator, lambda_se
     extcoeff <- SpatialExtremes::fitextcoeff(y[,indicator==k], pos_k, estim = "Smith", plot = FALSE, loess = FALSE, marge = "emp", std.err = FALSE)
     weights <- rep(1, n.pairs)
     extcoeff <- extcoeff[, "ext.coeff"]
-    dist <- distance(pos_k)
+    dist <- SpatialExtremes::distance(pos_k)
     funBR <- function(range, smooth) .C(SpatialExtremes:::C_fitbrcovariance, as.double(range), as.double(smooth), as.integer(n.pairs), 
                                         as.double(dist), as.double(extcoeff), as.double(weights), ans = double(1))$ans
     start <- list(range = max(dist)/2.73, smooth = 0.75)
@@ -145,7 +145,7 @@ BRdacVCMmu <- function(y, covariates_2, covariates_3, locs, indicator, lambda_se
     s_k <- sum(indicator==k)
     mu <- sigma <- xi <- rep(0, s_k)
     for (i in 1:s_k) {
-      marg.param <- gevmle(y[,which(indicator==k)[i]])
+      marg.param <- SpatialExtremes::gevmle(y[,which(indicator==k)[i]])
       mu[i] <- marg.param["loc"]
       sigma[i] <- marg.param["scale"]
       xi[i] <- marg.param["shape"]
@@ -293,7 +293,7 @@ BRdacVCMmusigma <- function(y, covariates_3, locs, indicator, lambda_seq){
     extcoeff <- SpatialExtremes::fitextcoeff(y[,indicator==k], pos_k, estim = "Smith", plot = FALSE, loess = FALSE, marge = "emp", std.err = FALSE)
     weights <- rep(1, n.pairs)
     extcoeff <- extcoeff[, "ext.coeff"]
-    dist <- distance(pos_k)
+    dist <- SpatialExtremes::distance(pos_k)
     funBR <- function(range, smooth) .C(SpatialExtremes:::C_fitbrcovariance, as.double(range), as.double(smooth), as.integer(n.pairs), 
                                         as.double(dist), as.double(extcoeff), as.double(weights), ans = double(1))$ans
     start <- list(range = max(dist)/2.73, smooth = 0.75)
@@ -305,7 +305,7 @@ BRdacVCMmusigma <- function(y, covariates_3, locs, indicator, lambda_seq){
     s_k <- sum(indicator==k)
     mu <- sigma <- xi <- rep(0, s_k)
     for (i in 1:s_k) {
-      marg.param <- gevmle(y[,which(indicator==k)[i]])
+      marg.param <- SpatialExtremes::gevmle(y[,which(indicator==k)[i]])
       mu[i] <- marg.param["loc"]
       sigma[i] <- marg.param["scale"]
       xi[i] <- marg.param["shape"]
@@ -453,16 +453,16 @@ CL <- function(y, covariates_1, covariates_2, covariates_3, quantile=0.95, locs)
   z_3 <- z_constructor(covariates_3, S, N, p_3)
   
   if(quantile>=0) {
-    thresholds <- apply(Y, 2, function(x) quantile(x, prob=quantile))
+    thresholds <- apply(y, 2, function(x) quantile(x, prob=quantile))
   } else {
-    thresholds <- rep(min(Y)-1, S)
+    thresholds <- rep(min(y)-1, S)
   }
   
   n.pairs <- S * (S-1)/2
   extcoeff <- SpatialExtremes::fitextcoeff(y, locs, estim="ST", plot=FALSE, loess=FALSE, marge="emp", std.err=FALSE, prob=quantile)
   weights <- rep(1, n.pairs)
   extcoeff <- extcoeff[, "ext.coeff"]
-  dist <- distance(locs)
+  dist <- SpatialExtremes::distance(locs)
   funBR <- function(range, smooth) .C(SpatialExtremes:::C_fitbrcovariance, as.double(range), as.double(smooth), as.integer(n.pairs), 
                                       as.double(dist), as.double(extcoeff), as.double(weights), ans = double(1))$ans
   start <- list(range = max(dist)/2.73, smooth = 0.75)
@@ -473,7 +473,7 @@ CL <- function(y, covariates_1, covariates_2, covariates_3, quantile=0.95, locs)
   
   mu <- sigma <- xi <- rep(0, S)
   for (i in 1:S) {
-    marg.param <- gevmle(y[,i])
+    marg.param <- SpatialExtremes::gevmle(y[,i])
     mu[i] <- marg.param["loc"]
     sigma[i] <- marg.param["scale"]
     xi[i] <- marg.param["shape"]
