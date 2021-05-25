@@ -524,14 +524,15 @@ double logL_marg_thresh(const arma::vec& par, const arma::vec& thresholds, const
       y_s = y(i,s);
       u_s = thresholds(s);
       if(std::isnan(y_s) | std::isnan(mu) | std::isnan(sigma) | std::isnan(xi)) continue;
-      if(abs(xi) <= 1e-6) x_s = exp(-(y_s-mu)/sigma);
-      else x_s = pow(1+xi*(y_s - mu)/sigma, -1/xi);
       
       if(y_s <= u_s){
+        if(abs(xi) <= 1e-6) x_s = exp(-(u_s-mu)/sigma);
+        else x_s = pow(1+xi*(u_s - mu)/sigma, -1/xi);
         SUM += -x_s;
       }
       if(y_s > u_s){
-        SUM += -log(sigma) + (1+xi)*log(x_s) - x_s;
+        if(abs(xi) <= 1e-6) SUM += -log(sigma) - (y_s-mu)/sigma - exp(-(y_s-mu)/sigma); //x_s = exp(-(y_s-mu)/sigma);
+        else SUM += -log(sigma) - (1+1/xi)*log(1+xi*(y_s - mu)/sigma) - pow(1+xi*(y_s - mu)/sigma, -1/xi); //x_s = pow(1+xi*(y_s - mu)/sigma, -1/xi);
       }
     }
   }
@@ -1311,6 +1312,99 @@ arma::vec score_all_thresh(const arma::vec& par, const arma::vec& thresholds, co
                 +(-log(cent_1) / pow(xi_1, 2.0) + (y_1-mu_1) / ( sigma_1*xi_1*cent_1 )) * pow(cent_1, 1/xi_1) * deriv_1 * z_3_1.row(i).t()
                 +(-log(cent_2) / pow(xi_2, 2.0) + (y_2-mu_2) / ( sigma_2*xi_2*cent_2 )) * pow(cent_2, 1/xi_2) * deriv_2 * z_3_2.row(i).t()
                 ;
+        }
+      }
+    }
+  }
+  
+  return -score;
+}
+
+// [[Rcpp::export]]
+arma::vec score_marg_thresh(const arma::vec& par, const arma::vec& thresholds, const arma::mat& y, 
+                           const arma::cube& z_1, const arma::cube& z_2, const arma::cube& z_3, 
+                           const arma::mat& locs){
+  int S = locs.n_rows;
+  int n = y.n_rows;
+  int p_1 = z_1.n_slices;
+  int p_2 = z_2.n_slices;
+  int p_3 = z_3.n_slices;
+  
+  const arma::vec& beta_1 = par.subvec(0, p_1-1);
+  const arma::vec& beta_2 = par.subvec(p_1, p_1+p_2-1);
+  const arma::vec& beta_3 = par.subvec(p_1+p_2, p_1+p_2+p_3-1);
+  
+  arma::mat score = zeros<vec>(p_1 + p_2 + p_3);
+  
+  //There is an RcppArmadillo bug in subsetting a cube, we need to take the transpose to preserve dimensions
+  //when there is only one slice
+  
+  //check here for updates: https://github.com/RcppCore/RcppArmadillo/issues/299
+  bool bug_1 = FALSE;
+  bool bug_2 = FALSE;
+  bool bug_3 = FALSE;
+  if(z_1.n_slices == 1) bug_1 = TRUE;
+  if(z_2.n_slices == 1) bug_2 = TRUE;
+  if(z_3.n_slices == 1) bug_3 = TRUE;
+  
+  arma::mat z_1_s, z_2_s, z_3_s;
+  double mu, sigma, xi, y_s, u_s;
+  for(int i=0; i<n; i++){
+    for(int s=0; s<S; s++){
+      z_1_s = z_1.row(s);
+      z_2_s = z_2.row(s);
+      z_3_s = z_3.row(s);
+      
+      if(bug_1) {
+        z_1_s = z_1_s.t();
+      }
+      if(bug_2) {
+        z_2_s = z_2_s.t();
+      }
+      if(bug_3) {
+        z_3_s = z_3_s.t();
+      }
+      
+      mu = as_scalar(z_1_s.row(i)*beta_1);
+      sigma = exp(as_scalar(z_2_s.row(i)*beta_2));
+      xi = as_scalar(z_3_s.row(i)*beta_3);
+      
+      y_s = y(i,s);
+      u_s = thresholds(s);
+      if(std::isnan(y_s) | std::isnan(mu) | std::isnan(sigma) | std::isnan(xi)) continue;
+      
+      if(y_s <= u_s){
+        if(abs(xi) <= 1e-6){
+          score.rows(0,p_1-1) += 1/sigma * exp(-(u_s-mu)/sigma) * z_1_s.row(i).t();
+          
+          score.rows(p_1, p_1+p_2-1) += (u_s-mu)/pow(sigma, 2.0)*exp(-(u_s-mu)/sigma)* sigma*z_2_s.row(i).t();
+          
+          score.rows(p_1+p_2, p_1+p_2+p_3-1) += 0;
+        } else {
+          score.rows(0,p_1-1) += 1/sigma * pow(1+xi*(u_s-mu)/sigma, -1-1/xi) * z_1_s.row(i).t();
+          
+          score.rows(p_1, p_1+p_2-1) += (u_s-mu)/pow(sigma, 2.0)*pow(1+xi*(u_s-mu)/sigma, -1-1/xi)* sigma*z_2_s.row(i).t();
+          
+          score.rows(p_1+p_2, p_1+p_2+p_3-1) += 
+            pow(1+xi*(u_s-mu)/sigma, -1/xi) * ( log(xi*(u_s-mu)/sigma+1)/pow(xi, 2.0) - (u_s-mu)/(sigma*xi*(xi*(u_s-mu)/sigma+1)) ) * z_3_s.row(i).t();
+        }
+        
+      }
+      if(y_s > u_s){
+        
+        if(abs(xi) <= 1e-6){
+          score.rows(0,p_1-1) += ((1+xi)/exp(-(y_s-mu)/sigma)-1)*(1/sigma * exp(-(y_s-mu)/sigma) ) * z_1_s.row(i).t();
+          
+          score.rows(p_1, p_1+p_2-1) += ((1+xi)/exp(-(y_s-mu)/sigma)-1)*((y_s-mu)/pow(sigma, 2.0)*exp(-(y_s-mu)/sigma))* sigma*z_2_s.row(i).t() ;
+          
+          score.rows(p_1+p_2, p_1+p_2+p_3-1) += 0;
+        } else{
+          score.rows(0,p_1-1) += ((1+xi)/pow(1+xi*(y_s - mu)/sigma, -1/xi)-1)*(1/sigma * pow(1+xi*(y_s-mu)/sigma, -1-1/xi)) * z_1_s.row(i).t();
+          
+          score.rows(p_1, p_1+p_2-1) += ((1+xi)/pow(1+xi*(y_s - mu)/sigma, -1/xi)-1)*((y_s-mu)/pow(sigma, 2.0)*pow(1+xi*(y_s-mu)/sigma, -1-1/xi))* sigma*z_2_s.row(i).t();
+          
+          score.rows(p_1+p_2, p_1+p_2+p_3-1) += ((1+xi)/pow(1+xi*(y_s - mu)/sigma, -1/xi)-1)*
+            (pow(1+xi*(y_s-mu)/sigma, -1/xi) * ( log(xi*(y_s-mu)/sigma+1)/pow(xi, 2.0) - (y_s-mu)/(sigma*xi*(xi*(y_s-mu)/sigma+1)) )) * z_3_s.row(i).t();
         }
       }
     }

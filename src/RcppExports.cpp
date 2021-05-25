@@ -164,6 +164,23 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// score_marg_thresh
+arma::vec score_marg_thresh(const arma::vec& par, const arma::vec& thresholds, const arma::mat& y, const arma::cube& z_1, const arma::cube& z_2, const arma::cube& z_3, const arma::mat& locs);
+RcppExport SEXP _BRdac_score_marg_thresh(SEXP parSEXP, SEXP thresholdsSEXP, SEXP ySEXP, SEXP z_1SEXP, SEXP z_2SEXP, SEXP z_3SEXP, SEXP locsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type par(parSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type thresholds(thresholdsSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const arma::cube& >::type z_1(z_1SEXP);
+    Rcpp::traits::input_parameter< const arma::cube& >::type z_2(z_2SEXP);
+    Rcpp::traits::input_parameter< const arma::cube& >::type z_3(z_3SEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type locs(locsSEXP);
+    rcpp_result_gen = Rcpp::wrap(score_marg_thresh(par, thresholds, y, z_1, z_2, z_3, locs));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_BRdac_z_constructor", (DL_FUNC) &_BRdac_z_constructor, 4},
@@ -175,6 +192,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_BRdac_logL_marg_thresh", (DL_FUNC) &_BRdac_logL_marg_thresh, 7},
     {"_BRdac_Chessian_all_thresh", (DL_FUNC) &_BRdac_Chessian_all_thresh, 7},
     {"_BRdac_score_all_thresh", (DL_FUNC) &_BRdac_score_all_thresh, 7},
+    {"_BRdac_score_marg_thresh", (DL_FUNC) &_BRdac_score_marg_thresh, 7},
     {NULL, NULL, 0}
 };
 
