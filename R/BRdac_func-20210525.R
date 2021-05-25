@@ -53,26 +53,28 @@ BRdac <- function(y, covariates_1, covariates_2, covariates_3, quantile=0.95, lo
                              solve(t(covariates_3_cc)%*%covariates_3_cc)%*%t(covariates_3_cc)%*%(rep(xi,N)[complete.cases(covariates_3)])))
   if(logCL_all_thresh(init_values, thresholds=thresholds, y=y, z_1=z_1, z_2=z_2, z_3=z_3, locs=locs)==Inf){
     opt_1 <- 
-      optim(par=init_values, fn=logL_marg_thresh, thresholds=thresholds, y=y, z_1=z_1, z_2=z_2, 
+      optim(par=init_values[-c(1:2)], fn=logL_marg_thresh, gr=score_marg_thresh, thresholds=thresholds, y=y, z_1=z_1, z_2=z_2, 
             z_3=z_3, locs=locs, method="BFGS")
-    init_values <- opt_1$par
+    init_values <- c(init_values[1:2], opt_1$par)
   }
   time_k <- list()
   time_before <- proc.time() - time
   for(k in 1:K){
     time_k[[k]] <- proc.time()
-    if(logCL_all_thresh(init_values, thresholds=thresholds[indicator==k],
-                        y=y[,indicator==k,drop=FALSE], z_1=z_1[indicator==k,,,drop=FALSE], z_2=z_2[indicator==k,,,drop=FALSE],
-                        z_3=z_3[indicator==k,,,drop=FALSE], locs=locs[indicator==k,])==Inf){
-      opt_1 <-
-        optim(par=init_values, fn=logL_marg_thresh, thresholds=thresholds[indicator==k],
-              y=y[,indicator==k,drop=FALSE], z_1=z_1[indicator==k,,,drop=FALSE], z_2=z_2[indicator==k,,,drop=FALSE],
-              z_3=z_3[indicator==k,,,drop=FALSE], locs=locs[indicator==k,],
-              method="BFGS")
-      init_values <- opt_1$par
-    }
+    
+    init_values_2 <- init_values
+    # if(logCL_all_thresh(init_values, thresholds=thresholds[indicator==k],
+    #                     y=y[,indicator==k,drop=FALSE], z_1=z_1[indicator==k,,,drop=FALSE], z_2=z_2[indicator==k,,,drop=FALSE],
+    #                     z_3=z_3[indicator==k,,,drop=FALSE], locs=locs[indicator==k,])==Inf){
+    #   opt_1 <-
+    #     optim(par=init_values[-c(1:2)], fn=logL_marg_thresh, gr=score_marg_thresh, thresholds=thresholds[indicator==k],
+    #           y=y[,indicator==k,drop=FALSE], z_1=z_1[indicator==k,,,drop=FALSE], z_2=z_2[indicator==k,,,drop=FALSE],
+    #           z_3=z_3[indicator==k,,,drop=FALSE], locs=locs[indicator==k,],
+    #           method="BFGS")
+    #   init_values_2 <- c(init_values[1:2], opt_1$par)
+    # }
     opt_2 <-
-      optim(par=init_values, fn=logCL_all_thresh, gr=score_all_thresh, thresholds=thresholds[indicator==k],
+      optim(par=init_values_2, fn=logCL_all_thresh, gr=score_all_thresh, thresholds=thresholds[indicator==k],
             y=y[,indicator==k,drop=FALSE], z_1=z_1[indicator==k,,,drop=FALSE], z_2=z_2[indicator==k,,,drop=FALSE], 
             z_3=z_3[indicator==k,,,drop=FALSE], locs=locs[indicator==k,],
             method="BFGS")
