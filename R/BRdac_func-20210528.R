@@ -95,7 +95,7 @@ BRdac <- function(y, covariates_1, covariates_2, covariates_3, quantile=0.95, lo
                                      sensitivity %*% V_inv %*% 
                                      unlist(lapply(order, 
                                                    function(x) sensitivity_list[[x]] %*% estimates[x,]))) 
-  output$vcov <- weight %*% sensitivity%*%V_inv%*%psi%*%t(psi)%*%V_inv%*%t(sensitivity) %*% weight
+  output$vcov <- weight %*% sensitivity%*%V_inv%*%V%*%V_inv%*%t(sensitivity) %*% weight
   time_after <- proc.time()-time_after
   
   output$time <- 
