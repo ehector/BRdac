@@ -11,6 +11,17 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// matrix_inv
+arma::mat matrix_inv(const arma::mat& X);
+RcppExport SEXP _BRdac_matrix_inv(SEXP XSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    rcpp_result_gen = Rcpp::wrap(matrix_inv(X));
+    return rcpp_result_gen;
+END_RCPP
+}
 // z_constructor
 arma::cube z_constructor(const arma::mat& covariates, const int& S, const int& N, const int& p);
 RcppExport SEXP _BRdac_z_constructor(SEXP covariatesSEXP, SEXP SSEXP, SEXP NSEXP, SEXP pSEXP) {
@@ -183,6 +194,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_BRdac_matrix_inv", (DL_FUNC) &_BRdac_matrix_inv, 1},
     {"_BRdac_z_constructor", (DL_FUNC) &_BRdac_z_constructor, 4},
     {"_BRdac_logPCL_BR_thresh", (DL_FUNC) &_BRdac_logPCL_BR_thresh, 7},
     {"_BRdac_logCL_BR_thresh", (DL_FUNC) &_BRdac_logCL_BR_thresh, 4},
