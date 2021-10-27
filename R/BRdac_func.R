@@ -1,3 +1,68 @@
+BRdacObjective <- function(output, y, covariates_1, covariates_2, covariates_3, quantile=0.95, locs, indicator){
+  time <- proc.time()
+  
+  p_1 <- dim(covariates_1)[2]
+  p_2 <- dim(covariates_2)[2]
+  p_3 <- dim(covariates_3)[2]
+  p <- p_1+p_2+p_3
+  
+  S <- nrow(locs)
+  N <- nrow(y)
+  K <- length(unique(indicator))
+  
+  z_1 <- z_constructor(covariates_1, S, N, p_1)
+  z_2 <- z_constructor(covariates_2, S, N, p_2)
+  z_3 <- z_constructor(covariates_3, S, N, p_3)
+  
+  psi_list <- list()
+  
+  if(quantile>=0) {
+    thresholds <- apply(y, 2, function(x) quantile(x, prob=quantile, na.rm=T))
+  } else {
+    thresholds <- rep(min(y, na.rm=T)-1, S)
+  }
+  
+  time_k_2 <- list()
+  time_before <- proc.time() - time
+  for(k in 1:K){
+    time_k_2[[k]] <- proc.time()
+    
+    result_k <- Chessian_all_thresh_reparm(output$coefficients, thresholds=thresholds[indicator==k], y=y[,indicator==k],
+                                    z_1=z_1[indicator==k,,,drop=FALSE], z_2=z_2[indicator==k,,,drop=FALSE],
+                                    z_3=z_3[indicator==k,,,drop=FALSE],
+                                    locs=locs[indicator==k,])
+    
+    psi_list[[k]] <- result_k$score
+    time_k_2[[k]] <- proc.time() - time_k_2[[k]]
+  }
+  
+  time_after <- proc.time()
+  psi <- do.call(rbind,psi_list)
+  if(sum(is.na(psi))!=0) {
+    warning(paste0("Missing values in the score kernels; model may not fit well. Proportion missingness: ", mean(is.na(psi))))
+    output$message <- paste0("Missing values in the score kernels; model may not fit well. Proportion missingness: ", mean(is.na(psi)))
+  } else {
+    output$message <- NULL
+  }
+  V <- var(t(psi), na.rm=T)*N
+  V_inv <- solve(V)
+  matrix <- as.matrix(Matrix::bdiag(lapply(1:K, function(k) V_inv[((k-1)*(p+2)+1):(k*(p+2)), ((k-1)*(p+2)+1):(k*(p+2))])))
+  V_inv <- matrix/N
+  score <- rowSums(psi, na.rm=T)
+  output$Q <- t(score) %*% V_inv %*% score
+  output$df <- qr(V_inv)$rank - length(output$coefficients)
+  output$p.value <- 1 - as.numeric(pchisq(output$Q, output$df))
+  time_after <- proc.time()-time_after
+  
+  output$time <- 
+    time_before + time_after + 
+    time_k_2[[which.max(sapply(time_k_2, function(x) x[3]))]]
+  
+  output$quantile <- quantile
+  output$indicator <- indicator
+  return(output)
+}
+
 BRdac <- function(y, covariates_1, covariates_2, covariates_3, quantile=0.95, locs, indicator){
   time <- proc.time()
   output <- list()
@@ -36,6 +101,9 @@ BRdac <- function(y, covariates_1, covariates_2, covariates_3, quantile=0.95, lo
   obj.fun <- function(p, ...) funBR(p, ...)
   body(obj.fun) <- parse(text = paste("funBR(", paste("p[", 1:2, "]", collapse = ", "), ", ...)"))
   cov.start <- optim(unlist(start), obj.fun, hessian = FALSE)$par
+  init_cov <- c(0,0)
+  init_cov[1] <- log(cov.start[2]/(2-cov.start[2]))
+  init_cov[2] <- log(cov.start[1])
   
   mu <- sigma <- xi <- rep(0, S)
   for (i in 1:S) {
@@ -47,10 +115,10 @@ BRdac <- function(y, covariates_1, covariates_2, covariates_3, quantile=0.95, lo
   covariates_1_cc <- covariates_1[complete.cases(covariates_1),]
   covariates_2_cc <- covariates_2[complete.cases(covariates_2),]
   covariates_3_cc <- covariates_3[complete.cases(covariates_3),]
-  init_values <- as.vector(c(cov.start[2], cov.start[1],
-                             matrix_inv(t(covariates_1_cc)%*%covariates_1_cc)%*%t(covariates_1_cc)%*%(rep(mu,N)[complete.cases(covariates_1)]), 
-                             matrix_inv(t(covariates_2_cc)%*%covariates_2_cc)%*%t(covariates_2_cc)%*%(rep(log(sigma),N)[complete.cases(covariates_2)]), 
-                             matrix_inv(t(covariates_3_cc)%*%covariates_3_cc)%*%t(covariates_3_cc)%*%(rep(xi,N)[complete.cases(covariates_3)])))
+  init_values <- as.vector(c(init_cov,
+                             solve(t(covariates_1_cc)%*%covariates_1_cc)%*%t(covariates_1_cc)%*%(rep(mu,N)[complete.cases(covariates_1)]), 
+                             solve(t(covariates_2_cc)%*%covariates_2_cc)%*%t(covariates_2_cc)%*%(rep(log(sigma),N)[complete.cases(covariates_2)]), 
+                             solve(t(covariates_3_cc)%*%covariates_3_cc)%*%t(covariates_3_cc)%*%(rep(xi,N)[complete.cases(covariates_3)])))
   mu <- covariates_1 %*% init_values[3:(2+p_1)]
   sigma <- exp(covariates_2 %*% init_values[(3+p_1):(2+p_1+p_2)])
   xi <- covariates_3 %*% init_values[(3+p_1+p_2):(2+p)]
@@ -66,11 +134,11 @@ BRdac <- function(y, covariates_1, covariates_2, covariates_3, quantile=0.95, lo
     time_k[[k]] <- proc.time()
     
     opt_2 <-
-      optim(par=init_values, fn=logCL_all_thresh, gr=score_all_thresh, thresholds=thresholds[indicator==k],
+      optim(par=init_values, fn=logCL_all_thresh_reparm, gr=score_all_thresh_reparm, thresholds=thresholds[indicator==k],
             y=y[,indicator==k,drop=FALSE], z_1=z_1[indicator==k,,,drop=FALSE], z_2=z_2[indicator==k,,,drop=FALSE], 
             z_3=z_3[indicator==k,,,drop=FALSE], locs=locs[indicator==k,],
             method="BFGS")
-    
+
     estimates[k,] <- opt_2$par
     time_k[[k]] <- proc.time() - time_k[[k]]
   }
@@ -83,7 +151,7 @@ BRdac <- function(y, covariates_1, covariates_2, covariates_3, quantile=0.95, lo
   for(k in 1:K){
     time_k_2[[k]] <- proc.time()
     
-    result_k <- Chessian_all_thresh(mean_estimates, thresholds=thresholds[indicator==k], y=y[,indicator==k],
+    result_k <- Chessian_all_thresh_reparm(mean_estimates, thresholds=thresholds[indicator==k], y=y[,indicator==k],
                                     z_1=z_1[indicator==k,,,drop=FALSE], z_2=z_2[indicator==k,,,drop=FALSE],
                                     z_3=z_3[indicator==k,,,drop=FALSE],
                                     locs=locs[indicator==k,])
@@ -103,10 +171,10 @@ BRdac <- function(y, covariates_1, covariates_2, covariates_3, quantile=0.95, lo
     output$message <- NULL
   }
   V <- var(t(psi), na.rm=T)*N
-  V_inv <- matrix_inv(V)
+  V_inv <- solve(V)
   matrix <- as.matrix(Matrix::bdiag(lapply(1:K, function(k) V_inv[((k-1)*(p+2)+1):(k*(p+2)), ((k-1)*(p+2)+1):(k*(p+2))])))
   V_inv <- matrix
-  weight <- matrix_inv(sensitivity %*% V_inv %*% t(sensitivity))
+  weight <- solve(sensitivity %*% V_inv %*% t(sensitivity))
   output$coefficients <- as.vector(weight %*% 
                                      sensitivity %*% V_inv %*% 
                                      unlist(lapply(1:K, 
@@ -114,6 +182,14 @@ BRdac <- function(y, covariates_1, covariates_2, covariates_3, quantile=0.95, lo
                                                      sensitivity_list[[k]] %*% estimates[k,]
                                                    }))) 
   output$vcov <- weight %*% sensitivity%*%V_inv%*%V%*%V_inv%*%t(sensitivity) %*% weight
+  
+  output$coefficients_reparm <- c(2*exp(output$coefficients[1])/(1+exp(output$coefficients[1])), exp(output$coefficients[2]),
+                                  output$coefficients[-c(1:2)])
+  output$var_reparm <- diag(output$vcov)
+  gradient <- diag(c(output$coefficients_reparm[1]/(1+exp(output$coefficients[1])), output$coefficients_reparm[2], rep(1,p) ))
+  output$var_reparm[1] <- output$var_reparm[1]*(output$coefficients_reparm[1]/(1+exp(output$coefficients[1])))^2
+  output$var_reparm[2] <- output$var_reparm[2]*(output$coefficients_reparm[2])^2
+  output$vcov_reparm <- gradient %*% output$vcov %*% gradient
   time_after <- proc.time()-time_after
   
   output$time <- 
@@ -130,7 +206,6 @@ BRdacVCMmusigma <- function(y, covariates_3, quantile=0.95, locs, indicator, lam
   output <- list()
   
   p_3 <- dim(covariates_3)[2]
-  covariates_3_cc <- covariates_3[complete.cases(covariates_3),]
   
   S <- nrow(locs)
   N <- nrow(y)
@@ -143,7 +218,7 @@ BRdacVCMmusigma <- function(y, covariates_3, quantile=0.95, locs, indicator, lam
   psi_list <- sensitivity_list <- list()
   
   if(quantile>=0) {
-    thresholds <- apply(y, 2, function(x) quantile(x, prob=quantile))
+    thresholds <- apply(y, 2, function(x) quantile(x, prob=quantile, na.rm=T))
   } else {
     thresholds <- rep(min(y)-1, S)
   }
@@ -160,6 +235,9 @@ BRdacVCMmusigma <- function(y, covariates_3, quantile=0.95, locs, indicator, lam
   obj.fun <- function(p, ...) funBR(p, ...)
   body(obj.fun) <- parse(text = paste("funBR(", paste("p[", 1:2, "]", collapse = ", "), ", ...)"))
   cov.start <- optim(unlist(start), obj.fun, hessian = FALSE)$par
+  init_cov <- c(0,0)
+  init_cov[1] <- log(cov.start[2]/(2-cov.start[2]))
+  init_cov[2] <- log(cov.start[1])
   
   mu <- sigma <- xi <- rep(0, S)
   for (i in 1:S) {
@@ -169,7 +247,7 @@ BRdacVCMmusigma <- function(y, covariates_3, quantile=0.95, locs, indicator, lam
     xi[i] <- marg.param["shape"]
   }
   
-  init_values <- as.vector(c(cov.start[2], cov.start[1], matrix_inv(t(covariates_3)%*%covariates_3)%*%t(covariates_3)%*%rep(xi,N)))
+  init_values <- as.vector(c(init_cov, solve(t(covariates_3)%*%covariates_3)%*%t(covariates_3)%*%rep(xi,N)))
   
   time_k <- list()
   time_before <- proc.time() - time
@@ -179,6 +257,7 @@ BRdacVCMmusigma <- function(y, covariates_3, quantile=0.95, locs, indicator, lam
     
     pos_k <- locs[indicator==k,]
     s_k <- sum(indicator==k)
+    #knots_mat <- pos_k
     knots_mat <- fields::cover.design( pos_k, 10, num.nn=s_k/2, start=floor(seq(1,s_k,length.out=10)) )$design
     attr(knots_mat,"scaled:scale") <- attr(knots_mat,"scaled:center") <- NULL
     colnames(knots_mat) <- NULL
@@ -191,27 +270,37 @@ BRdacVCMmusigma <- function(y, covariates_3, quantile=0.95, locs, indicator, lam
     p <- p_1+p_2+p_3
     
     init_par <- c(init_values[1:2],
-                  matrix_inv(t(new_X)%*%new_X) %*% t(new_X) %*%rep(mu[indicator==k],N),
-                  matrix_inv(t(new_X)%*%new_X) %*% t(new_X) %*%rep(sigma[indicator==k],N),
+                  solve(t(new_X)%*%new_X) %*% t(new_X) %*%rep(mu[indicator==k],N),
+                  solve(t(new_X)%*%new_X) %*% t(new_X) %*%rep(log(sigma[indicator==k]),N),
                   init_values[-c(1:2)])
+    mu_sub <- new_X %*% init_par[3:(2+p_1)]
+    sigma_sub <- exp(new_X %*% init_par[(3+p_1):(2+p_1+p_2)])
+    xi_sub <- covariates_3[rep(indicator==k,N),,drop=FALSE] %*% init_par[(3+p_1+p_2):(2+p)]
+    scaled <- ( c(t(y[,indicator==k,drop=FALSE])) - mu_sub )*xi_sub/sigma_sub
+    fudge <- which(scaled < -1 & xi_sub < 0)
+    if(length(fudge)>0) {
+      c <- max(1, -scaled[fudge]) + 1e-5
+      init_par[(3+p_1+p_2):(2+p)] <- init_par[(3+p_1+p_2):(2+p)]/c
+    }
+
     opt_2 <- tryCatch(
       optim(par=init_par,
-            fn=logCL_all_thresh,
+            fn=logCL_all_thresh_reparm,
             thresholds=thresholds[indicator==k],
             y=y[,indicator==k,drop=FALSE], z_1=new_z_1[[k]], z_2=new_z_2[[k]],
             z_3=z_3[indicator==k,,,drop=FALSE], locs=pos_k, method="BFGS", control=list(maxit=1000)),
-      error = function(c) list(message="error")
+      error = function(c) {
+        list(message="error")
+      }
     )
     if(!is.null(opt_2$message)){
-      if(opt_2$message == "error"){
-        print("Optimization failed. Trying with analytic gradient.")
-        opt_2 <-
-          optim(par=init_par,
-                fn=logCL_all_thresh, gr=score_all_thresh,
-                thresholds=thresholds[indicator==k],
-                y=y[,indicator==k,drop=FALSE], z_1=new_z_1[[k]], z_2=new_z_2[[k]],
-                z_3=z_3[indicator==k,,,drop=FALSE], locs=pos_k, method="BFGS", control=list(maxit=1000))  
-      }
+      print("Optimization failed. Trying with analytic gradient.")
+      opt_2 <-
+        optim(par=init_par,
+              fn=logCL_all_thresh_reparm, gr=score_all_thresh_reparm,
+              thresholds=thresholds[indicator==k],
+              y=y[,indicator==k,drop=FALSE], z_1=new_z_1[[k]], z_2=new_z_2[[k]],
+              z_3=z_3[indicator==k,,,drop=FALSE], locs=pos_k, method="BFGS", control=list(maxit=1000))  
     }
     print(paste0("Convergence = ",opt_2$convergence), quote=FALSE)
     estimates[[k]] <- opt_2$par
@@ -227,17 +316,23 @@ BRdacVCMmusigma <- function(y, covariates_3, quantile=0.95, locs, indicator, lam
   for(k in 1:K){
     time_k_2[[k]] <- proc.time()
     
-    result_k <- Chessian_all_thresh(c(mean_estimates[1:2], estimates[k,c(3:(2+p_1+p_2))], mean_estimates[-c(1:2)]), 
+    result_k <- Chessian_all_thresh_reparm(c(mean_estimates[1:2], estimates[k,c(3:(2+p_1+p_2))], mean_estimates[-c(1:2)]), 
                                     thresholds=thresholds[indicator==k], y=y[,indicator==k], z_1=new_z_1[[k]], 
                                     z_2=new_z_2[[k]], z_3=z_3[indicator==k,,,drop=FALSE], locs=locs[indicator==k,])
     psi_list[[k]] <- result_k$score
-    sensitivity_list[[k]] <- result_k$sensitivity %*% t(result_k$sensitivity)
+    sensitivity_list[[k]] <- var(t(result_k$sensitivity), na.rm=T)*ncol(result_k$sensitivity)
     
     time_k_2[[k]] <- proc.time() - time_k_2[[k]]
   }
   
   time_after <- proc.time()
   psi <- do.call(rbind,psi_list)
+  if(sum(is.na(psi))!=0) {
+    warning(paste0("Missing values in the score kernels; model may not fit well. Proportion missingness: ", mean(is.na(psi))))
+    output$message <- paste0("Missing values in the score kernels; model may not fit well. Proportion missingness: ", mean(is.na(psi)))
+  } else {
+    output$message <- NULL
+  }
   
   sensitivity <- do.call(cbind, sensitivity_list)
   sensitivity <- matrix(0, 2+K*(p_1+p_2)+p_3, K*(2+p_1+p_2+p_3))
@@ -245,14 +340,14 @@ BRdacVCMmusigma <- function(y, covariates_3, quantile=0.95, locs, indicator, lam
   sensitivity[-c(1:2,(2+K*(p_1+p_2)+1):(2+K*(p_1+p_2)+p_3)),] <- 
     as.matrix(Matrix::bdiag(lapply(sensitivity_list, function(x) x[-c(1:2,(2+p_1+p_2+1):(2+p_1+p_2+p_3)),])))
   
-  V <- (psi-rowMeans(psi))%*%t(psi-rowMeans(psi))
-  V_inv <- matrix_inv(V)
+  V <- var(t(psi), na.rm=T)*N
+  V_inv <- solve(V)
   matrix <- as.matrix(Matrix::bdiag(lapply(1:K, function(k) V_inv[((k-1)*(p+2)+1):(k*(p+2)), ((k-1)*(p+2)+1):(k*(p+2))])))
   V_inv <- matrix
   
   quad_form <- sensitivity %*% V_inv %*% t(sensitivity)
   
-  pos_cols <- do.call(rbind, lapply(new_z_1, function(x) x[,1,2:3]))
+  pos_cols <- do.call(rbind, lapply(1:K, function(k) locs[indicator==k,]))
   order <- apply(locs, 1, function(x) which(equiv(pos_cols[,1],x[1]) & equiv(pos_cols[,2], x[2])))
   X_tilde_1 <- as.matrix(Matrix::bdiag(lapply(new_z_1, function(x) x[,1,])))
   X_tilde_1 <- X_tilde_1[order,]
@@ -277,7 +372,7 @@ BRdacVCMmusigma <- function(y, covariates_3, quantile=0.95, locs, indicator, lam
     diag(penalty)[3:(2+K*p_1)] <- N*lam_1
     diag(penalty)[(2+K*p_1+1):(2+K*p_1+K*p_2)] <- N*lam_2
     
-    weight <- matrix_inv(quad_form + penalty)
+    weight <- solve(quad_form + penalty)
     
     output$coefficients[[l]] <- as.vector(weight %*% 
                                             sensitivity %*% V_inv %*% 
@@ -303,13 +398,13 @@ BRdacVCMmusigma <- function(y, covariates_3, quantile=0.95, locs, indicator, lam
     for(k in 1:K){
       time_k_3[[k]] <- proc.time()
       
-      result_k <- Chessian_all_thresh(c(output$coefficients[[l]][1:2], output$coefficients[[l]][(2+(k-1)*(p_1+p_2)+1):(2+k*(p_1+p_2))],
+      result_k <- Chessian_all_thresh_reparm(c(output$coefficients[[l]][1:2], output$coefficients[[l]][(2+(k-1)*(p_1+p_2)+1):(2+k*(p_1+p_2))],
                                         output$coefficients[[l]][(2+K*(p_1+p_2)+1):(2+K*(p_1+p_2)+p_3)]),
                                       thresholds=thresholds[indicator==k], y=y[,indicator==k], z_1=new_z_1[[k]], z_2=new_z_2[[k]],
                                       z_3=z_3[indicator==k,,,drop=FALSE], locs=locs[indicator==k,])
       
       psi_list_GCV[[k]] <- result_k$score
-      sensitivity_list_GCV[[k]] <- result_k$sensitivity %*% t(result_k$sensitivity)
+      sensitivity_list_GCV[[k]] <- var(t(result_k$sensitivity), na.rm=T)*ncol(result_k$sensitivity)
       
       time_k_3[[k]] <- proc.time() - time_k_3[[k]]
     }
@@ -323,13 +418,13 @@ BRdacVCMmusigma <- function(y, covariates_3, quantile=0.95, locs, indicator, lam
       as.matrix(Matrix::bdiag(lapply(sensitivity_list_GCV, function(x) x[-c(1:2,(2+p_1+p_2+1):(2+p_1+p_2+p_3)),])))
     
     psi_GCV <- do.call(rbind,psi_list_GCV)
-    V_GCV <- (psi_GCV-rowMeans(psi_GCV))%*%t(psi_GCV-rowMeans(psi_GCV))
-    V_inv_GCV <- matrix_inv(V_GCV)
+    V_GCV <- var(t(psi_GCV), na.rm=T)*N
+    V_inv_GCV <- solve(V_GCV)
     matrix <- as.matrix(Matrix::bdiag(lapply(1:K, function(k) V_inv_GCV[((k-1)*(p+2)+1):(k*(p+2)), ((k-1)*(p+2)+1):(k*(p+2))])))
     V_inv_GCV <- matrix
     quad_form_GCV <- sensitivity_GCV %*% V_inv_GCV %*% t(sensitivity_GCV)
     
-    weight_GCV <- matrix_inv(quad_form_GCV + penalty)
+    weight_GCV <- solve(quad_form_GCV + penalty)
     
     GCV_numerator <- N^(-1)*as.numeric(rowMeans(psi_GCV)%*%V_inv_GCV%*%rowMeans(psi_GCV))
     output$GCV[l] <- GCV_numerator / ( 1 - N^(-1)*sum(diag( weight_GCV %*% quad_form_GCV )))^2
@@ -386,6 +481,9 @@ CL <- function(y, covariates_1, covariates_2, covariates_3, quantile=0.95, locs)
   obj.fun <- function(p, ...) funBR(p, ...)
   body(obj.fun) <- parse(text = paste("funBR(", paste("p[", 1:2, "]", collapse = ", "), ", ...)"))
   cov.start <- optim(unlist(start), obj.fun, hessian = FALSE)$par
+  init_cov <- c(0,0)
+  init_cov[1] <- log(cov.start[2]/(2-cov.start[2]))
+  init_cov[2] <- log(cov.start[1])
   
   mu <- sigma <- xi <- rep(0, S)
   for (i in 1:S) {
@@ -394,23 +492,36 @@ CL <- function(y, covariates_1, covariates_2, covariates_3, quantile=0.95, locs)
     sigma[i] <- marg.param["scale"]
     xi[i] <- marg.param["shape"]
   }
-  
-  init_values <- as.vector(c(cov.start[2], cov.start[1], 
-                             matrix_inv(t(covariates_1)%*%covariates_1)%*%t(covariates_1)%*%rep(mu,N), 
-                             matrix_inv(t(covariates_2)%*%covariates_2)%*%t(covariates_2)%*%rep(sigma,N), 
-                             matrix_inv(t(covariates_3)%*%covariates_3)%*%t(covariates_3)%*%rep(xi,N)))
+  covariates_1_cc <- covariates_1[complete.cases(covariates_1),]
+  covariates_2_cc <- covariates_2[complete.cases(covariates_2),]
+  covariates_3_cc <- covariates_3[complete.cases(covariates_3),]
+  init_values <- as.vector(c(init_cov,
+                             solve(t(covariates_1_cc)%*%covariates_1_cc)%*%t(covariates_1_cc)%*%(rep(mu,N)[complete.cases(covariates_1)]), 
+                             solve(t(covariates_2_cc)%*%covariates_2_cc)%*%t(covariates_2_cc)%*%(rep(log(sigma),N)[complete.cases(covariates_2)]), 
+                             solve(t(covariates_3_cc)%*%covariates_3_cc)%*%t(covariates_3_cc)%*%(rep(xi,N)[complete.cases(covariates_3)])))
+  mu <- covariates_1 %*% init_values[3:(2+p_1)]
+  sigma <- exp(covariates_2 %*% init_values[(3+p_1):(2+p_1+p_2)])
+  xi <- covariates_3 %*% init_values[(3+p_1+p_2):(2+p)]
+  scaled <- ( c(t(y)) - mu )*xi/sigma
+  fudge <- which(scaled < -1 & xi < 0)
+  if(length(fudge)>0) {
+    c <- max(1, -scaled[fudge]) + 1e-5
+    init_values[(3+p_1+p_2):(2+p)] <- init_values[(3+p_1+p_2):(2+p)]/c
+  }
   
   opt_2 <-
-    optim(par=init_values, fn=logCL_all_thresh, gr=score_all_thresh, thresholds=thresholds,
+    optim(par=init_values, fn=logCL_all_thresh_reparm, gr=score_all_thresh_reparm, thresholds=thresholds,
           y=y, z_1=z_1, z_2=z_2, z_3=z_3, locs=locs, method="BFGS")
   
   output$coefficients <- opt_2$par
   
-  result <- Chessian_all_thresh(output$coefficients, thresholds=thresholds, y=y, z_1=z_1, z_2=z_2, z_3=z_3, locs=locs)
+  result <- Chessian_all_thresh_reparm(output$coefficients, thresholds=thresholds, y=y, z_1=z_1, z_2=z_2, z_3=z_3, locs=locs)
   psi <- result$score
-  sensitivity <- result$sensitivity %*% t(result$sensitivity)
-  output$vcov <- matrix_inv(sensitivity)%*%psi%*%t(psi)%*%matrix_inv(sensitivity)
+  sensitivity <- var(t(result$sensitivity), na.rm=T)*ncol(result$sensitivity)
+  output$vcov <- solve(sensitivity)%*%var(t(psi), na.rm=T)%*%solve(sensitivity)*N
   
+  output$coefficients_reparm <- c(2*exp(output$coefficients[1])/(1+exp(output$coefficients[1])), exp(output$coefficients[2]),
+                                  output$coefficients[-c(1:2)])
   output$time <- proc.time()-time
   
   return(output)
@@ -420,3 +531,5 @@ gaussian_basis <- function(phi2, tau2, sigma2, dist){
   if(dist>0) return(sigma2*exp(-phi2*dist^2))
   else return(tau2+sigma2)
 }
+
+equiv <- function(x, y, .tol = 1e-5) abs(x - y) <= .tol

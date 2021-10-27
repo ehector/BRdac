@@ -29,6 +29,10 @@ logCL_all_thresh <- function(par, thresholds, y, z_1, z_2, z_3, locs) {
     .Call(`_BRdac_logCL_all_thresh`, par, thresholds, y, z_1, z_2, z_3, locs)
 }
 
+logCL_all_thresh_reparm <- function(par, thresholds, y, z_1, z_2, z_3, locs) {
+    .Call(`_BRdac_logCL_all_thresh_reparm`, par, thresholds, y, z_1, z_2, z_3, locs)
+}
+
 logL_marg_thresh <- function(par, thresholds, y, z_1, z_2, z_3, locs) {
     .Call(`_BRdac_logL_marg_thresh`, par, thresholds, y, z_1, z_2, z_3, locs)
 }
@@ -37,11 +41,27 @@ Chessian_all_thresh <- function(par, thresholds, y, z_1, z_2, z_3, locs) {
     .Call(`_BRdac_Chessian_all_thresh`, par, thresholds, y, z_1, z_2, z_3, locs)
 }
 
+Chessian_all_thresh_reparm <- function(par, thresholds, y, z_1, z_2, z_3, locs) {
+    .Call(`_BRdac_Chessian_all_thresh_reparm`, par, thresholds, y, z_1, z_2, z_3, locs)
+}
+
 score_all_thresh <- function(par, thresholds, y, z_1, z_2, z_3, locs) {
     .Call(`_BRdac_score_all_thresh`, par, thresholds, y, z_1, z_2, z_3, locs)
 }
 
+score_all_thresh_reparm <- function(par, thresholds, y, z_1, z_2, z_3, locs) {
+    .Call(`_BRdac_score_all_thresh_reparm`, par, thresholds, y, z_1, z_2, z_3, locs)
+}
+
 score_marg_thresh <- function(par, thresholds, y, z_1, z_2, z_3, locs) {
     .Call(`_BRdac_score_marg_thresh`, par, thresholds, y, z_1, z_2, z_3, locs)
+}
+
+scoremat_marg_thresh <- function(par, thresholds, y, z_1, z_2, z_3, locs) {
+    .Call(`_BRdac_scoremat_marg_thresh`, par, thresholds, y, z_1, z_2, z_3, locs)
+}
+
+sensitivity_marg_thresh <- function(par, thresholds, y, z_1, z_2, z_3, locs) {
+    .Call(`_BRdac_sensitivity_marg_thresh`, par, thresholds, y, z_1, z_2, z_3, locs)
 }
 
