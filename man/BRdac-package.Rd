@@ -8,7 +8,11 @@
   The DESCRIPTION file: \packageDESCRIPTION{BRdac}
   \packageIndices{BRdac}
 
-  This package contains the functions to perform regression analysis of extreme spatial data using a divide-and-conquer approach in the Brown-Resnick max stable process model. The main functions are:
+  This package contains the functions to perform regression analysis of extreme spatial data using a divide-and-conquer approach in the Brown-Resnick max stable process model. The R package's main files are:
+- src/CL-funcs.cpp: this file defines the Rcpp functions that compute the pairwise censored composite likelihood and censored composite score for the Brown-Resnick model with unit Fréchet margins, and the pairwise censored composite likelihood and censored composite score functions for the transformed data with regression models for the location, scale and shape.
+- R/BRdac_func.R: this file defines the R function for the divide-and-conquer estimation of model parameters.
+
+The main functions are:
     - BRdac: estimates regression parameters in non spatially-varying coefficient model (Section 3)
     - BRdacVCMmusigma: estimates regression parameters in spatially-varying coefficient model (Section 4). One Gaussian basis function is used within each block with 10 knots chosen by minimizing a geometric space-filling criterion (Royle and Nychka, 1998). For more control over the spatially varying coefficient model, users should create their own covariate expansions and use the BRdac function.
     - BRdacObjective: performs a goodness-of-fit test by evaluating the GMM objective function at the supplied model output and comparing it to the appropriate chi squared quantile.
@@ -19,8 +23,27 @@
   Maintainer: \packageMaintainer{BRdac}
 }
 \references{
-  Hector, E. C. and Song, P. X.-K. (2020). Doubly distributed supervised learning and infer- ence with high-dimensional correlated outcomes. Journal of Machine Learning Research, 21:1–35.
-Huser, R. and Davison, A. C. (2013). Composite likelihood estimation for the Brown- Resnick process. Biometrika, 100(2):511–518.
+# Installation
+
+The BRdac R package can be installed in one of two ways:
+- from the downloaded gzipped tarball as R CMD INSTALL BRdac_1.0-1.tar.gz
+- from the downloaded and renamed BRdac folder as R CMD build BRdac and R CMD INSTALL BRdac_1.0-1.tar.gz
+
+Please make sure to have all packages listed in the DESCRIPTION file already installed. If you encounter a library not found error for lgfortran, please try installing gfortran from here: https://cran.r-project.org/bin/macosx/tools/.
+
+# Citation
+
+If you use the BRdac R package, please consider citing the relevant manuscript.
+
+# References
+
+Hector, E. C. and Song, P. X.-K. (2021). A distributed and integrated method of moments for high-dimensional correlated data analysis. Journal of the American Statistical Association, 116(534):805–818
+
+Lars P. Hansen. (1982). Large sample properties of generalized method of moments estimators. Econometrica, 50(4), 1029-1054.
+
+Huser, R. and Davison, A. C. (2014). Space–time modelling of extreme events. Journal of the Royal Statistical Society, Series B, 76(2):439–461.
+
+Padoan, S., Ribatet, M., and Sisson, S. (2010). Likelihood-based inference for max-stable processes. Journal of the American Statistical Association, 105(489):263–277.
 }
 % Optionally other standard keywords, one per line,
 % from the file KEYWORDS in the R documentation.
