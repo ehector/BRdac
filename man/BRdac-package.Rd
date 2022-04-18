@@ -8,8 +8,10 @@
   The DESCRIPTION file: \packageDESCRIPTION{BRdac}
   \packageIndices{BRdac}
 
-  This section should provide a more detailed overview of how to use the
-  package, including the most important functions.
+  This package contains the functions to perform regression analysis of extreme spatial data using a divide-and-conquer approach in the Brown-Resnick max stable process model. The main functions are:
+    - BRdac: estimates regression parameters in non spatially-varying coefficient model (Section 3)
+    - BRdacVCMmusigma: estimates regression parameters in spatially-varying coefficient model (Section 4). One Gaussian basis function is used within each block with 10 knots chosen by minimizing a geometric space-filling criterion (Royle and Nychka, 1998). For more control over the spatially varying coefficient model, users should create their own covariate expansions and use the BRdac function.
+    - BRdacObjective: performs a goodness-of-fit test by evaluating the GMM objective function at the supplied model output and comparing it to the appropriate chi squared quantile.
 }
 \author{
   \packageAuthor{BRdac}
@@ -17,14 +19,14 @@
   Maintainer: \packageMaintainer{BRdac}
 }
 \references{
-  This optional section can contain literature or other references for
-  background information.
+  Hector, E. C. and Song, P. X.-K. (2020). Doubly distributed supervised learning and infer- ence with high-dimensional correlated outcomes. Journal of Machine Learning Research, 21:1–35.
+Huser, R. and Davison, A. C. (2013). Composite likelihood estimation for the Brown- Resnick process. Biometrika, 100(2):511–518.
 }
 % Optionally other standard keywords, one per line,
 % from the file KEYWORDS in the R documentation.
 \keyword{package}
 \seealso{
-  Optional links to other man pages
+  SpatialExtremes
 }
 \examples{
 
