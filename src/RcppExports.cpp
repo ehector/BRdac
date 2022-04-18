@@ -53,9 +53,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// logCL_BR_thresh
-double logCL_BR_thresh(const arma::vec& par, const arma::vec& thresholds, const arma::mat& x, const arma::mat& locs);
-RcppExport SEXP _BRdac_logCL_BR_thresh(SEXP parSEXP, SEXP thresholdsSEXP, SEXP xSEXP, SEXP locsSEXP) {
+// logCL_BR_thresh_reparm
+double logCL_BR_thresh_reparm(const arma::vec& par, const arma::vec& thresholds, const arma::mat& x, const arma::mat& locs);
+RcppExport SEXP _BRdac_logCL_BR_thresh_reparm(SEXP parSEXP, SEXP thresholdsSEXP, SEXP xSEXP, SEXP locsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -63,21 +63,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::vec& >::type thresholds(thresholdsSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type locs(locsSEXP);
-    rcpp_result_gen = Rcpp::wrap(logCL_BR_thresh(par, thresholds, x, locs));
-    return rcpp_result_gen;
-END_RCPP
-}
-// Cscore_BR_thresh
-arma::mat Cscore_BR_thresh(const arma::vec& par, const arma::vec& thresholds, const arma::mat& x, const arma::mat& locs);
-RcppExport SEXP _BRdac_Cscore_BR_thresh(SEXP parSEXP, SEXP thresholdsSEXP, SEXP xSEXP, SEXP locsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::vec& >::type par(parSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type thresholds(thresholdsSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type locs(locsSEXP);
-    rcpp_result_gen = Rcpp::wrap(Cscore_BR_thresh(par, thresholds, x, locs));
+    rcpp_result_gen = Rcpp::wrap(logCL_BR_thresh_reparm(par, thresholds, x, locs));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -104,23 +90,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::vec& >::type loc_1(loc_1SEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type loc_2(loc_2SEXP);
     rcpp_result_gen = Rcpp::wrap(logPCL_all_thresh(alpha, phi, beta_1, beta_2, beta_3, u_1, u_2, y, z_1_1, z_2_1, z_3_1, z_1_2, z_2_2, z_3_2, loc_1, loc_2));
-    return rcpp_result_gen;
-END_RCPP
-}
-// logCL_all_thresh
-double logCL_all_thresh(const arma::vec& par, const arma::vec& thresholds, const arma::mat& y, const arma::cube& z_1, const arma::cube& z_2, const arma::cube& z_3, const arma::mat& locs);
-RcppExport SEXP _BRdac_logCL_all_thresh(SEXP parSEXP, SEXP thresholdsSEXP, SEXP ySEXP, SEXP z_1SEXP, SEXP z_2SEXP, SEXP z_3SEXP, SEXP locsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::vec& >::type par(parSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type thresholds(thresholdsSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type y(ySEXP);
-    Rcpp::traits::input_parameter< const arma::cube& >::type z_1(z_1SEXP);
-    Rcpp::traits::input_parameter< const arma::cube& >::type z_2(z_2SEXP);
-    Rcpp::traits::input_parameter< const arma::cube& >::type z_3(z_3SEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type locs(locsSEXP);
-    rcpp_result_gen = Rcpp::wrap(logCL_all_thresh(par, thresholds, y, z_1, z_2, z_3, locs));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -158,20 +127,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// Chessian_all_thresh
-List Chessian_all_thresh(const arma::vec& par, const arma::vec& thresholds, const arma::mat& y, const arma::cube& z_1, const arma::cube& z_2, const arma::cube& z_3, const arma::mat& locs);
-RcppExport SEXP _BRdac_Chessian_all_thresh(SEXP parSEXP, SEXP thresholdsSEXP, SEXP ySEXP, SEXP z_1SEXP, SEXP z_2SEXP, SEXP z_3SEXP, SEXP locsSEXP) {
+// Cscore_BR_thresh_reparm
+arma::mat Cscore_BR_thresh_reparm(const arma::vec& par, const arma::vec& thresholds, const arma::mat& x, const arma::mat& locs);
+RcppExport SEXP _BRdac_Cscore_BR_thresh_reparm(SEXP parSEXP, SEXP thresholdsSEXP, SEXP xSEXP, SEXP locsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::vec& >::type par(parSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type thresholds(thresholdsSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type y(ySEXP);
-    Rcpp::traits::input_parameter< const arma::cube& >::type z_1(z_1SEXP);
-    Rcpp::traits::input_parameter< const arma::cube& >::type z_2(z_2SEXP);
-    Rcpp::traits::input_parameter< const arma::cube& >::type z_3(z_3SEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type locs(locsSEXP);
-    rcpp_result_gen = Rcpp::wrap(Chessian_all_thresh(par, thresholds, y, z_1, z_2, z_3, locs));
+    rcpp_result_gen = Rcpp::wrap(Cscore_BR_thresh_reparm(par, thresholds, x, locs));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -192,20 +158,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// score_all_thresh
-arma::vec score_all_thresh(const arma::vec& par, const arma::vec& thresholds, const arma::mat& y, const arma::cube& z_1, const arma::cube& z_2, const arma::cube& z_3, const arma::mat& locs);
-RcppExport SEXP _BRdac_score_all_thresh(SEXP parSEXP, SEXP thresholdsSEXP, SEXP ySEXP, SEXP z_1SEXP, SEXP z_2SEXP, SEXP z_3SEXP, SEXP locsSEXP) {
+// score_BR_thresh_reparm
+arma::vec score_BR_thresh_reparm(const arma::vec& par, const arma::vec& thresholds, const arma::mat& x, const arma::mat& locs);
+RcppExport SEXP _BRdac_score_BR_thresh_reparm(SEXP parSEXP, SEXP thresholdsSEXP, SEXP xSEXP, SEXP locsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::vec& >::type par(parSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type thresholds(thresholdsSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type y(ySEXP);
-    Rcpp::traits::input_parameter< const arma::cube& >::type z_1(z_1SEXP);
-    Rcpp::traits::input_parameter< const arma::cube& >::type z_2(z_2SEXP);
-    Rcpp::traits::input_parameter< const arma::cube& >::type z_3(z_3SEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type locs(locsSEXP);
-    rcpp_result_gen = Rcpp::wrap(score_all_thresh(par, thresholds, y, z_1, z_2, z_3, locs));
+    rcpp_result_gen = Rcpp::wrap(score_BR_thresh_reparm(par, thresholds, x, locs));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -243,58 +206,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// scoremat_marg_thresh
-arma::mat scoremat_marg_thresh(const arma::vec& par, const arma::vec& thresholds, const arma::mat& y, const arma::cube& z_1, const arma::cube& z_2, const arma::cube& z_3, const arma::mat& locs);
-RcppExport SEXP _BRdac_scoremat_marg_thresh(SEXP parSEXP, SEXP thresholdsSEXP, SEXP ySEXP, SEXP z_1SEXP, SEXP z_2SEXP, SEXP z_3SEXP, SEXP locsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::vec& >::type par(parSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type thresholds(thresholdsSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type y(ySEXP);
-    Rcpp::traits::input_parameter< const arma::cube& >::type z_1(z_1SEXP);
-    Rcpp::traits::input_parameter< const arma::cube& >::type z_2(z_2SEXP);
-    Rcpp::traits::input_parameter< const arma::cube& >::type z_3(z_3SEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type locs(locsSEXP);
-    rcpp_result_gen = Rcpp::wrap(scoremat_marg_thresh(par, thresholds, y, z_1, z_2, z_3, locs));
-    return rcpp_result_gen;
-END_RCPP
-}
-// sensitivity_marg_thresh
-arma::mat sensitivity_marg_thresh(const arma::vec& par, const arma::vec& thresholds, const arma::mat& y, const arma::cube& z_1, const arma::cube& z_2, const arma::cube& z_3, const arma::mat& locs);
-RcppExport SEXP _BRdac_sensitivity_marg_thresh(SEXP parSEXP, SEXP thresholdsSEXP, SEXP ySEXP, SEXP z_1SEXP, SEXP z_2SEXP, SEXP z_3SEXP, SEXP locsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::vec& >::type par(parSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type thresholds(thresholdsSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type y(ySEXP);
-    Rcpp::traits::input_parameter< const arma::cube& >::type z_1(z_1SEXP);
-    Rcpp::traits::input_parameter< const arma::cube& >::type z_2(z_2SEXP);
-    Rcpp::traits::input_parameter< const arma::cube& >::type z_3(z_3SEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type locs(locsSEXP);
-    rcpp_result_gen = Rcpp::wrap(sensitivity_marg_thresh(par, thresholds, y, z_1, z_2, z_3, locs));
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_BRdac_matrix_inv", (DL_FUNC) &_BRdac_matrix_inv, 1},
     {"_BRdac_z_constructor", (DL_FUNC) &_BRdac_z_constructor, 4},
     {"_BRdac_logPCL_BR_thresh", (DL_FUNC) &_BRdac_logPCL_BR_thresh, 7},
-    {"_BRdac_logCL_BR_thresh", (DL_FUNC) &_BRdac_logCL_BR_thresh, 4},
-    {"_BRdac_Cscore_BR_thresh", (DL_FUNC) &_BRdac_Cscore_BR_thresh, 4},
+    {"_BRdac_logCL_BR_thresh_reparm", (DL_FUNC) &_BRdac_logCL_BR_thresh_reparm, 4},
     {"_BRdac_logPCL_all_thresh", (DL_FUNC) &_BRdac_logPCL_all_thresh, 16},
-    {"_BRdac_logCL_all_thresh", (DL_FUNC) &_BRdac_logCL_all_thresh, 7},
     {"_BRdac_logCL_all_thresh_reparm", (DL_FUNC) &_BRdac_logCL_all_thresh_reparm, 7},
     {"_BRdac_logL_marg_thresh", (DL_FUNC) &_BRdac_logL_marg_thresh, 7},
-    {"_BRdac_Chessian_all_thresh", (DL_FUNC) &_BRdac_Chessian_all_thresh, 7},
+    {"_BRdac_Cscore_BR_thresh_reparm", (DL_FUNC) &_BRdac_Cscore_BR_thresh_reparm, 4},
     {"_BRdac_Chessian_all_thresh_reparm", (DL_FUNC) &_BRdac_Chessian_all_thresh_reparm, 7},
-    {"_BRdac_score_all_thresh", (DL_FUNC) &_BRdac_score_all_thresh, 7},
+    {"_BRdac_score_BR_thresh_reparm", (DL_FUNC) &_BRdac_score_BR_thresh_reparm, 4},
     {"_BRdac_score_all_thresh_reparm", (DL_FUNC) &_BRdac_score_all_thresh_reparm, 7},
     {"_BRdac_score_marg_thresh", (DL_FUNC) &_BRdac_score_marg_thresh, 7},
-    {"_BRdac_scoremat_marg_thresh", (DL_FUNC) &_BRdac_scoremat_marg_thresh, 7},
-    {"_BRdac_sensitivity_marg_thresh", (DL_FUNC) &_BRdac_sensitivity_marg_thresh, 7},
     {NULL, NULL, 0}
 };
 
