@@ -21,8 +21,20 @@ logPCL_all_thresh <- function(alpha, phi, beta_1, beta_2, beta_3, u_1, u_2, y, z
     .Call(`_BRdac_logPCL_all_thresh`, alpha, phi, beta_1, beta_2, beta_3, u_1, u_2, y, z_1_1, z_2_1, z_3_1, z_1_2, z_2_2, z_3_2, loc_1, loc_2)
 }
 
+iMSP_logPCL_all_thresh <- function(alpha, phi, beta_1, beta_2, beta_3, u_1, u_2, y, z_1_1, z_2_1, z_3_1, z_1_2, z_2_2, z_3_2, loc_1, loc_2) {
+    .Call(`_BRdac_iMSP_logPCL_all_thresh`, alpha, phi, beta_1, beta_2, beta_3, u_1, u_2, y, z_1_1, z_2_1, z_3_1, z_1_2, z_2_2, z_3_2, loc_1, loc_2)
+}
+
 logCL_all_thresh_reparm <- function(par, thresholds, y, z_1, z_2, z_3, locs) {
     .Call(`_BRdac_logCL_all_thresh_reparm`, par, thresholds, y, z_1, z_2, z_3, locs)
+}
+
+iMSP_logCL_all_thresh_reparm <- function(par, thresholds, y, z_1, z_2, z_3, locs) {
+    .Call(`_BRdac_iMSP_logCL_all_thresh_reparm`, par, thresholds, y, z_1, z_2, z_3, locs)
+}
+
+tapered_logCL_all_thresh_reparm <- function(par, thresholds, y, z_1, z_2, z_3, locs, taper) {
+    .Call(`_BRdac_tapered_logCL_all_thresh_reparm`, par, thresholds, y, z_1, z_2, z_3, locs, taper)
 }
 
 logL_marg_thresh <- function(par, thresholds, y, z_1, z_2, z_3, locs) {
@@ -37,12 +49,28 @@ Chessian_all_thresh_reparm <- function(par, thresholds, y, z_1, z_2, z_3, locs) 
     .Call(`_BRdac_Chessian_all_thresh_reparm`, par, thresholds, y, z_1, z_2, z_3, locs)
 }
 
+iMSP_Chessian_all_thresh_reparm <- function(par, thresholds, y, z_1, z_2, z_3, locs) {
+    .Call(`_BRdac_iMSP_Chessian_all_thresh_reparm`, par, thresholds, y, z_1, z_2, z_3, locs)
+}
+
+tapered_Chessian_all_thresh_reparm <- function(par, thresholds, y, z_1, z_2, z_3, locs, taper) {
+    .Call(`_BRdac_tapered_Chessian_all_thresh_reparm`, par, thresholds, y, z_1, z_2, z_3, locs, taper)
+}
+
 score_BR_thresh_reparm <- function(par, thresholds, x, locs) {
     .Call(`_BRdac_score_BR_thresh_reparm`, par, thresholds, x, locs)
 }
 
 score_all_thresh_reparm <- function(par, thresholds, y, z_1, z_2, z_3, locs) {
     .Call(`_BRdac_score_all_thresh_reparm`, par, thresholds, y, z_1, z_2, z_3, locs)
+}
+
+iMSP_score_all_thresh_reparm <- function(par, thresholds, y, z_1, z_2, z_3, locs) {
+    .Call(`_BRdac_iMSP_score_all_thresh_reparm`, par, thresholds, y, z_1, z_2, z_3, locs)
+}
+
+tapered_score_all_thresh_reparm <- function(par, thresholds, y, z_1, z_2, z_3, locs, taper) {
+    .Call(`_BRdac_tapered_score_all_thresh_reparm`, par, thresholds, y, z_1, z_2, z_3, locs, taper)
 }
 
 score_marg_thresh <- function(par, thresholds, y, z_1, z_2, z_3, locs) {
