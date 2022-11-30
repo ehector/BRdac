@@ -1,8 +1,8 @@
 # About
 Divide-and-conquer approach for Brown-Resnick models
 
-This is a repository for the R package to estimate Brown-Resnick model parameters using a divide-and-conquer procedure. The R package's main files are:
-- src/CL-funcs.cpp: this file defines the Rcpp functions that compute the pairwise censored composite likelihood and censored composite score for the Brown-Resnick model with unit Fréchet margins, and the pairwise censored composite likelihood and censored composite score functions for the transformed data with regression models for the location, scale and shape.
+This is a repository for the R package to estimate Brown-Resnick and inverted Brown-Resnick max-stable model parameters using a divide-and-conquer procedure. The R package's main files are:
+- src/CL-funcs.cpp: this file defines the Rcpp functions that compute the pairwise censored composite likelihood and censored composite score for the Brown-Resnick and inverted Brown-Resnick models with unit Fréchet margins, and the pairwise censored composite likelihood and censored composite score functions for the transformed data with regression models for the location, scale and shape.
 - R/BRdac_func.R: this file defines the R function for the divide-and-conquer estimation of model parameters.
 
 The BRdac man file contains an example for running the regression model from the paper.
@@ -19,7 +19,7 @@ Please make sure to have all packages listed in the DESCRIPTION file already ins
 
 # Citation
 
-If you use the BRdac R package, please consider citing the relevant manuscript: Hector & Reich.
+If you use the BRdac R package, please consider citing the relevant manuscript: E.C. Hector and B.J. Reich (2022+). Distributed inference for spatial extremes modeling in high dimensions. arXiv, arXiv:2204.14165.
 
 # References
 
