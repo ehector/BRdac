@@ -19,7 +19,7 @@ Please make sure to have all packages listed in the DESCRIPTION file already ins
 
 # Citation
 
-If you use the BRdac R package, please consider citing the relevant manuscript: E.C. Hector and B.J. Reich (2022+). Distributed inference for spatial extremes modeling in high dimensions. arXiv, arXiv:2204.14165.
+If you use the BRdac R package, please consider citing the relevant manuscript: E.C. Hector and B.J. Reich (2023). Distributed inference for spatial extremes modeling in high dimensions. Journal of the American Statistical Association. doi: 10.1080/01621459.2023.2186886.
 
 # References
 
